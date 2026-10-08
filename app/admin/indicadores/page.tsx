@@ -294,7 +294,7 @@ export default function AdminIndicadoresPage() {
         <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-8">
           Tráfego e Engajamento
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <SummaryCard
             title="Usuários"
             value={data?.totalUsuarios || 0}
@@ -324,8 +324,15 @@ export default function AdminIndicadoresPage() {
             colorText="#D4380D"
           />
           <SummaryCard
-            title="Redirecionamentos"
-            value={data?.pageViews?.redirecionamento || 0}
+            title="Redirec. MEI"
+            value={data?.pageViews?.redirecionamentoMei || 0}
+            icon={ExternalLink}
+            colorBg="#F9F0FF"
+            colorText="#722ED1"
+          />
+          <SummaryCard
+            title="Redirec. Usuário"
+            value={data?.pageViews?.redirecionamentoUsuario || 0}
             icon={ExternalLink}
             colorBg="#F9F0FF"
             colorText="#722ED1"
