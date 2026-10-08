@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import React, { useState, useEffect, useRef, Suspense, useMemo } from "react";
 import { TiltImage } from "@/components/ui/TiltImage";
-import "leaflet/dist/leaflet.css";
 import { categories } from "@/app/page";
 import {
   getEstablishmentById,
