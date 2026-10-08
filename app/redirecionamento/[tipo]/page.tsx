@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import { registrarVisualizacao } from "@/lib/api";
 
-const RedirecionamentoPage = () => {
+const RedirecionamentoPage = ({ params }: { params: { tipo: string } }) => {
   const [countdown, setCountdown] = useState(2);
   const router = useRouter();
 
@@ -17,9 +17,13 @@ const RedirecionamentoPage = () => {
     if (!jaContabilizou.current) {
       jaContabilizou.current = true;
 
-      registrarVisualizacao("REDIRECIONAMENTO");
+      if (params.tipo === "mei") {
+        registrarVisualizacao("REDIRECIONAMENTO_ANZOL_MEI");
+      } else if (params.tipo === "usuario") {
+        registrarVisualizacao("REDIRECIONAMENTO_ANZOL_USUARIO");
+      }
     }
-  }, []);
+  }, [params.tipo]);
 
   useEffect(() => {
     if (countdown <= 0) {
@@ -32,7 +36,7 @@ const RedirecionamentoPage = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [countdown, router]);
+  }, [countdown, router, params.tipo]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
@@ -46,7 +50,7 @@ const RedirecionamentoPage = () => {
       <Card className="w-full max-w-md rounded-xl shadow-md">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold text-gray-800">
-            Redirecionando para página principal...
+            Redirecionando...
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center text-center">
@@ -58,8 +62,7 @@ const RedirecionamentoPage = () => {
           </div>
 
           <p className="text-gray-600">
-            Ação concluída com sucesso! Você será redirecionado para a página
-            principal em {countdown} segundos.
+            Ação concluída com sucesso! Você será redirecionado em {countdown} segundos.
           </p>
         </CardContent>
       </Card>

@@ -21,16 +21,17 @@ import {
   Users,
   ShoppingCart,
   GraduationCap,
-  Printer, // Novo
-  Download, // Novo
-  Share2, // Novo
-  ExternalLink, // Novo
-  MessageCircle, // Novo
-  Mail, // Novo
+  Printer, 
+  Download, 
+  Share2, 
+  ExternalLink, 
+  MessageCircle, 
+  Mail, 
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getAdminStats } from "@/lib/api";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Bar,
   BarChart,
@@ -164,43 +165,50 @@ export default function AdminIndicadoresPage() {
     colorText,
     suffix,
   }: any) => (
-    <Card
-      className="border-none shadow-sm h-full print:shadow-none print:border print:border-gray-200"
-      style={{ background: colorBg }}
+    <motion.div
+      whileHover={{ y: -4, scale: 1.01 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="h-full"
     >
-      <CardContent className="p-6 flex items-center justify-between">
-        <div>
-          <p
-            className="font-medium uppercase text-xs tracking-wider mb-1"
-            style={{ color: colorText, opacity: 0.8 }}
-          >
-            {title}
-          </p>
-          <div className="flex items-baseline">
-            <span
-              className="text-3xl font-extrabold"
-              style={{ color: colorText }}
+      <Card
+        className="border-none shadow-sm h-full print:shadow-none print:border print:border-gray-200 overflow-hidden"
+        style={{ background: colorBg }}
+      >
+        <CardContent className="p-6 flex items-center justify-between relative h-full">
+          <div className="relative z-10">
+            <p
+              className="font-medium uppercase text-xs tracking-wider mb-1"
+              style={{ color: colorText, opacity: 0.8 }}
             >
-              {value}
-            </span>
-            {suffix && (
+              {title}
+            </p>
+            <div className="flex items-baseline">
               <span
-                className="text-sm font-semibold ml-2 opacity-70"
+                className="text-3xl font-extrabold"
                 style={{ color: colorText }}
               >
-                {suffix}
+                {value}
               </span>
-            )}
+              {suffix && (
+                <span
+                  className="text-sm font-semibold ml-2 opacity-70"
+                  style={{ color: colorText }}
+                >
+                  {suffix}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-        <div
-          className="p-3 rounded-full bg-white/30 print:bg-transparent"
-          style={{ color: colorText }}
-        >
-          <Icon size={28} />
-        </div>
-      </CardContent>
-    </Card>
+          <div
+            className="p-3 rounded-full bg-white/20 print:bg-transparent relative z-10"
+            style={{ color: colorText }}
+          >
+            <Icon size={28} />
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   return (
@@ -294,20 +302,13 @@ export default function AdminIndicadoresPage() {
         <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-8">
           Tráfego e Engajamento
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <SummaryCard
             title="Usuários"
             value={data?.totalUsuarios || 0}
             icon={Users}
             colorBg="#F6FFED"
             colorText="#389E0D"
-          />
-          <SummaryCard
-            title="Acessos Home"
-            value={data?.pageViews?.home || 0}
-            icon={Home}
-            colorBg="#E6F7FF"
-            colorText="#0050B3"
           />
           <SummaryCard
             title="Espaço MEI"
@@ -323,12 +324,47 @@ export default function AdminIndicadoresPage() {
             colorBg="#FFF2E8"
             colorText="#D4380D"
           />
+        </div>
+
+        {/* 2.5 CARDS ANZOL */}
+        <h2 className="text-xs font-bold text-slate-800 uppercase tracking-widest mt-8">
+          Métricas de Campanha (ANZOL)
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           <SummaryCard
-            title="Redirecionamentos"
-            value={data?.pageViews?.redirecionamento || 0}
+            title="Acesso Home (GERAL)"
+            value={data?.pageViews?.home || 0}
+            icon={Home}
+            colorBg="#0f172a"
+            colorText="#ffffff"
+          />
+          <SummaryCard
+            title="Home (Orgânico)"
+            value={Math.max(0, (data?.pageViews?.home || 0) - ((data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)))}
+            icon={Home}
+            colorBg="#1e293b"
+            colorText="#bfdbfe"
+          />
+          <SummaryCard
+            title="ANZOL (Geral)"
+            value={(data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)}
             icon={ExternalLink}
-            colorBg="#F9F0FF"
-            colorText="#722ED1"
+            colorBg="#0ea5e9"
+            colorText="#ffffff"
+          />
+          <SummaryCard
+            title="ANZOL (MEI)"
+            value={data?.pageViews?.redirecionamentoMei || 0}
+            icon={ExternalLink}
+            colorBg="#1e293b"
+            colorText="#38bdf8"
+          />
+          <SummaryCard
+            title="ANZOL (Usuário)"
+            value={data?.pageViews?.redirecionamentoUsuario || 0}
+            icon={ExternalLink}
+            colorBg="#1e293b"
+            colorText="#38bdf8"
           />
         </div>
 
