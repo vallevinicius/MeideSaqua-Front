@@ -303,13 +303,6 @@ export default function AdminIndicadoresPage() {
             colorText="#389E0D"
           />
           <SummaryCard
-            title="Acessos Home"
-            value={data?.pageViews?.home || 0}
-            icon={Home}
-            colorBg="#E6F7FF"
-            colorText="#0050B3"
-          />
-          <SummaryCard
             title="Espaço MEI"
             value={data?.pageViews?.espacoMei || 0}
             icon={Globe}
@@ -323,19 +316,47 @@ export default function AdminIndicadoresPage() {
             colorBg="#FFF2E8"
             colorText="#D4380D"
           />
+        </div>
+
+        {/* 2.5 CARDS ANZOL */}
+        <h2 className="text-xs font-bold text-slate-800 uppercase tracking-widest mt-8">
+          Métricas de Campanha (ANZOL)
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           <SummaryCard
-            title="Redirec. MEI"
-            value={data?.pageViews?.redirecionamentoMei || 0}
-            icon={ExternalLink}
-            colorBg="#F9F0FF"
-            colorText="#722ED1"
+            title="Acesso Home (GERAL)"
+            value={data?.pageViews?.home || 0}
+            icon={Home}
+            colorBg="#0f172a"
+            colorText="#ffffff"
           />
           <SummaryCard
-            title="Redirec. Usuário"
+            title="Home (Orgânico)"
+            value={Math.max(0, (data?.pageViews?.home || 0) - ((data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)))}
+            icon={Home}
+            colorBg="#1e293b"
+            colorText="#bfdbfe"
+          />
+          <SummaryCard
+            title="ANZOL (Geral)"
+            value={(data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)}
+            icon={ExternalLink}
+            colorBg="#0ea5e9"
+            colorText="#ffffff"
+          />
+          <SummaryCard
+            title="ANZOL (MEI)"
+            value={data?.pageViews?.redirecionamentoMei || 0}
+            icon={ExternalLink}
+            colorBg="#1e293b"
+            colorText="#38bdf8"
+          />
+          <SummaryCard
+            title="ANZOL (Usuário)"
             value={data?.pageViews?.redirecionamentoUsuario || 0}
             icon={ExternalLink}
-            colorBg="#F9F0FF"
-            colorText="#722ED1"
+            colorBg="#1e293b"
+            colorText="#38bdf8"
           />
         </div>
 
