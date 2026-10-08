@@ -65,25 +65,25 @@ const getCategoryColor = (categoryName: string) => {
   return CATEGORY_COLORS[categoryName] || "#8884d8";
 };
 
-const hoverCursorColor = { fill: "#d1d5db", opacity: 0.15 };
+const hoverCursorColor = { fill: "#f1f5f9", opacity: 0.5 };
 
 const configMeis = {
-  qtd: { label: "MEIs", color: "#3C6AB2" },
+  qtd: { label: "MEIs", color: "#3b82f6" },
 } satisfies ChartConfig;
 const configViews = {
-  views: { label: "Acessos", color: "#8884d8" },
+  views: { label: "Acessos", color: "#8b5cf6" },
 } satisfies ChartConfig;
 const configNotas = {
-  qtd: { label: "Avaliações", color: "#00AEEF" },
+  qtd: { label: "Avaliações", color: "#0ea5e9" },
 } satisfies ChartConfig;
 const configEscalaNegocio = {
-  value: { label: "Qtd.", color: "#FDB713" },
+  value: { label: "Qtd.", color: "#f59e0b" },
 } satisfies ChartConfig;
 const configVendas = {
-  qtd: { label: "Qtd.", color: "#10B981" },
+  qtd: { label: "Qtd.", color: "#10b981" },
 } satisfies ChartConfig;
 const configCursos = {
-  qtd: { label: "Cliques", color: "#F59E0B" },
+  qtd: { label: "Cliques", color: "#f59e0b" },
 } satisfies ChartConfig;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -113,7 +113,6 @@ export default function AdminIndicadoresPage() {
     fetchStats();
   }, [router]);
 
-  // --- FUNÇÃO PARA EXPORTAR CSV ---
   const handleExport = async () => {
     const token = localStorage.getItem("admin_token");
     if (!token) return;
@@ -121,9 +120,7 @@ export default function AdminIndicadoresPage() {
     try {
       const response = await fetch(
         `${API_URL}/api/admin/exportar-estabelecimentos`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.ok) {
@@ -144,15 +141,14 @@ export default function AdminIndicadoresPage() {
     }
   };
 
-  // --- FUNÇÃO PARA IMPRIMIR ---
   const handlePrint = () => {
     window.print();
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex justify-center items-center h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
       </div>
     );
   }
@@ -161,50 +157,35 @@ export default function AdminIndicadoresPage() {
     title,
     value,
     icon: Icon,
-    colorBg,
-    colorText,
+    iconColorClass,
+    iconBgClass,
     suffix,
   }: any) => (
     <motion.div
-      whileHover={{ y: -4, scale: 1.01 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={{ y: -2, scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       className="h-full"
     >
-      <Card
-        className="border-none shadow-sm h-full print:shadow-none print:border print:border-gray-200 overflow-hidden"
-        style={{ background: colorBg }}
-      >
-        <CardContent className="p-6 flex items-center justify-between relative h-full">
-          <div className="relative z-10">
-            <p
-              className="font-medium uppercase text-xs tracking-wider mb-1"
-              style={{ color: colorText, opacity: 0.8 }}
-            >
+      <Card className="h-full shadow-sm hover:shadow-md transition-shadow border-slate-200 overflow-hidden bg-white print:shadow-none print:border-gray-200">
+        <CardContent className="p-5 flex items-center justify-between relative h-full">
+          <div className="flex flex-col gap-1 z-10">
+            <p className="font-semibold uppercase text-[10px] tracking-wider text-slate-500">
               {title}
             </p>
-            <div className="flex items-baseline">
-              <span
-                className="text-3xl font-extrabold"
-                style={{ color: colorText }}
-              >
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold text-slate-900 tracking-tight">
                 {value}
               </span>
               {suffix && (
-                <span
-                  className="text-sm font-semibold ml-2 opacity-70"
-                  style={{ color: colorText }}
-                >
+                <span className="text-sm font-medium text-slate-400">
                   {suffix}
                 </span>
               )}
             </div>
           </div>
-          <div
-            className="p-3 rounded-full bg-white/20 print:bg-transparent relative z-10"
-            style={{ color: colorText }}
-          >
-            <Icon size={28} />
+          <div className={`p-2.5 rounded-xl ${iconBgClass} ${iconColorClass} shrink-0`}>
+            <Icon size={20} strokeWidth={2.5} />
           </div>
         </CardContent>
       </Card>
@@ -212,62 +193,41 @@ export default function AdminIndicadoresPage() {
   );
 
   return (
-    <div className="p-6 min-h-screen bg-[#f4f7fe] print:bg-white print:p-0">
-      {/* Estilos Globais para Impressão */}
+    <div className="p-6 min-h-screen bg-slate-50/50 print:bg-white print:p-0">
       <style jsx global>{`
         @media print {
-          @page {
-            margin: 1cm;
-            size: landscape;
-          }
-          body {
-            background-color: white;
-            -webkit-print-color-adjust: exact;
-          }
-          .no-print {
-            display: none !important;
-          }
-          .print-break-inside-avoid {
-            break-inside: avoid;
-          }
+          @page { margin: 1cm; size: landscape; }
+          body { background-color: white; -webkit-print-color-adjust: exact; }
+          .no-print { display: none !important; }
+          .print-break-inside-avoid { break-inside: avoid; }
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* CABEÇALHO */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link href="/admin/dashboard" className="no-print">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
+              <Button variant="outline" size="icon" className="h-9 w-9 rounded-full bg-white">
+                <ArrowLeft className="h-4 w-4 text-slate-600" />
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">
                 Painel de Indicadores
               </h1>
-              <p className="text-gray-500">
-                Visão geral do ecossistema MeiDeSaquá.
+              <p className="text-sm text-slate-500">
+                Visão consolidada do ecossistema MeiDeSaquá
               </p>
             </div>
           </div>
 
-          {/* BOTÕES DE AÇÃO (Escondidos na impressão) */}
           <div className="flex gap-2 no-print">
-            <Button
-              variant="outline"
-              onClick={handlePrint}
-              className="flex gap-2"
-            >
-              <Printer className="h-4 w-4" />
-              Imprimir
+            <Button variant="outline" onClick={handlePrint} className="h-9 gap-2 bg-white">
+              <Printer className="h-4 w-4" /> Imprimir
             </Button>
-            <Button
-              onClick={handleExport}
-              className="bg-green-600 hover:bg-green-700 flex gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Exportar CSV
+            <Button onClick={handleExport} className="h-9 gap-2 bg-slate-900 hover:bg-slate-800 text-white">
+              <Download className="h-4 w-4" /> Exportar CSV
             </Button>
           </div>
         </div>
@@ -278,175 +238,147 @@ export default function AdminIndicadoresPage() {
             title="MEIs Ativos"
             value={data?.totalMeis}
             icon={Lightbulb}
-            colorBg="#E6F7FF"
-            colorText="#0050B3"
+            iconBgClass="bg-blue-50"
+            iconColorClass="text-blue-600"
           />
           <SummaryCard
             title="Média Geral"
             value={data?.mediaAvaliacao}
             icon={TrendingUp}
-            colorBg="#FFF7E6"
-            colorText="#D46B08"
+            iconBgClass="bg-amber-50"
+            iconColorClass="text-amber-600"
             suffix="/ 5.0"
           />
           <SummaryCard
             title="Comentários"
             value={data?.totalAvaliacoes}
             icon={CheckCircle}
-            colorBg="#FFF0F6"
-            colorText="#C41D7F"
+            iconBgClass="bg-emerald-50"
+            iconColorClass="text-emerald-600"
           />
         </div>
 
         {/* 2. CARDS DE TRÁFEGO */}
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-8">
-          Tráfego e Engajamento
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <SummaryCard
-            title="Usuários"
-            value={data?.totalUsuarios || 0}
-            icon={Users}
-            colorBg="#F6FFED"
-            colorText="#389E0D"
-          />
-          <SummaryCard
-            title="Espaço MEI"
-            value={data?.pageViews?.espacoMei || 0}
-            icon={Globe}
-            colorBg="#F0F5FF"
-            colorText="#2F54EB"
-          />
-          <SummaryCard
-            title="Categ. Visitadas"
-            value={data?.pageViews?.categoriasTotal || 0}
-            icon={MousePointerClick}
-            colorBg="#FFF2E8"
-            colorText="#D4380D"
-          />
+        <div className="space-y-3">
+          <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest px-1">
+            Tráfego Orgânico
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <SummaryCard
+              title="Usuários Totais"
+              value={data?.totalUsuarios || 0}
+              icon={Users}
+              iconBgClass="bg-slate-100"
+              iconColorClass="text-slate-600"
+            />
+            <SummaryCard
+              title="Acessos Espaço MEI"
+              value={data?.pageViews?.espacoMei || 0}
+              icon={Globe}
+              iconBgClass="bg-slate-100"
+              iconColorClass="text-slate-600"
+            />
+            <SummaryCard
+              title="Categorias Visitadas"
+              value={data?.pageViews?.categoriasTotal || 0}
+              icon={MousePointerClick}
+              iconBgClass="bg-slate-100"
+              iconColorClass="text-slate-600"
+            />
+          </div>
         </div>
 
         {/* 2.5 CARDS ANZOL */}
-        <h2 className="text-xs font-bold text-slate-800 uppercase tracking-widest mt-8">
-          Métricas de Campanha (ANZOL)
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          <SummaryCard
-            title="Acesso Home (GERAL)"
-            value={data?.pageViews?.home || 0}
-            icon={Home}
-            colorBg="#0f172a"
-            colorText="#ffffff"
-          />
-          <SummaryCard
-            title="Home (Orgânico)"
-            value={Math.max(0, (data?.pageViews?.home || 0) - ((data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)))}
-            icon={Home}
-            colorBg="#1e293b"
-            colorText="#bfdbfe"
-          />
-          <SummaryCard
-            title="ANZOL (Geral)"
-            value={(data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)}
-            icon={ExternalLink}
-            colorBg="#0ea5e9"
-            colorText="#ffffff"
-          />
-          <SummaryCard
-            title="ANZOL (MEI)"
-            value={data?.pageViews?.redirecionamentoMei || 0}
-            icon={ExternalLink}
-            colorBg="#1e293b"
-            colorText="#38bdf8"
-          />
-          <SummaryCard
-            title="ANZOL (Usuário)"
-            value={data?.pageViews?.redirecionamentoUsuario || 0}
-            icon={ExternalLink}
-            colorBg="#1e293b"
-            colorText="#38bdf8"
-          />
+        <div className="space-y-3">
+          <h2 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest px-1">
+            Métricas de Campanha (ANZOL)
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <SummaryCard
+              title="Acesso Home (GERAL)"
+              value={data?.pageViews?.home || 0}
+              icon={Home}
+              iconBgClass="bg-slate-100"
+              iconColorClass="text-slate-600"
+            />
+            <SummaryCard
+              title="Home (Orgânico)"
+              value={Math.max(0, (data?.pageViews?.home || 0) - ((data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)))}
+              icon={Home}
+              iconBgClass="bg-slate-100"
+              iconColorClass="text-slate-600"
+            />
+            <SummaryCard
+              title="ANZOL (Geral)"
+              value={(data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)}
+              icon={ExternalLink}
+              iconBgClass="bg-indigo-50"
+              iconColorClass="text-indigo-600"
+            />
+            <SummaryCard
+              title="ANZOL (MEI)"
+              value={data?.pageViews?.redirecionamentoMei || 0}
+              icon={ExternalLink}
+              iconBgClass="bg-indigo-50"
+              iconColorClass="text-indigo-600"
+            />
+            <SummaryCard
+              title="ANZOL (Usuário)"
+              value={data?.pageViews?.redirecionamentoUsuario || 0}
+              icon={ExternalLink}
+              iconBgClass="bg-indigo-50"
+              iconColorClass="text-indigo-600"
+            />
+          </div>
         </div>
 
-        {/* --- 3. NOVOS CARDS: INTERAÇÕES E COMPARTILHAMENTO --- */}
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-8 print-break-inside-avoid">
-          Interações e Alcance
-        </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print-break-inside-avoid">
+        {/* 3. INTERAÇÕES E COMPARTILHAMENTO */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print-break-inside-avoid pt-2">
           {/* Card: Cliques em Links do Espaço MEI */}
-          <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <MousePointerClick className="text-blue-600 h-5 w-5" />
-                Links de Suporte (Espaço MEI)
+          <Card className="border border-slate-200 shadow-sm bg-white rounded-xl h-full">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base font-semibold text-slate-800">
+                Canais de Atendimento
               </CardTitle>
-              <CardDescription>
-                Cliques registrados nos canais de atendimento.
-              </CardDescription>
+              <CardDescription>Cliques em botões de contato no Espaço MEI.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                {/* Gov.br */}
-                <div className="p-4 rounded-lg bg-blue-50 border border-blue-100">
-                  <div className="flex justify-center mb-2 text-blue-600">
-                    <ExternalLink size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-gray-800">
-                    {data?.espacoMeiClicks?.gov || 0}
-                  </div>
-                  <div className="text-xs text-gray-500 font-medium uppercase mt-1">
-                    Portal GOV
-                  </div>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex flex-col items-center">
+                  <ExternalLink size={18} className="text-slate-400 mb-2" />
+                  <span className="text-xl font-bold text-slate-800 tracking-tight">{data?.espacoMeiClicks?.gov || 0}</span>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Gov.br</span>
                 </div>
-                {/* WhatsApp */}
-                <div className="p-4 rounded-lg bg-green-50 border border-green-100">
-                  <div className="flex justify-center mb-2 text-green-600">
-                    <MessageCircle size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-gray-800">
-                    {data?.espacoMeiClicks?.wpp || 0}
-                  </div>
-                  <div className="text-xs text-gray-500 font-medium uppercase mt-1">
-                    WhatsApp
-                  </div>
+                <div className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex flex-col items-center">
+                  <MessageCircle size={18} className="text-slate-400 mb-2" />
+                  <span className="text-xl font-bold text-slate-800 tracking-tight">{data?.espacoMeiClicks?.wpp || 0}</span>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">WhatsApp</span>
                 </div>
-                {/* Email */}
-                <div className="p-4 rounded-lg bg-amber-50 border border-amber-100">
-                  <div className="flex justify-center mb-2 text-amber-600">
-                    <Mail size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-gray-800">
-                    {data?.espacoMeiClicks?.email || 0}
-                  </div>
-                  <div className="text-xs text-gray-500 font-medium uppercase mt-1">
-                    E-mail
-                  </div>
+                <div className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex flex-col items-center">
+                  <Mail size={18} className="text-slate-400 mb-2" />
+                  <span className="text-xl font-bold text-slate-800 tracking-tight">{data?.espacoMeiClicks?.email || 0}</span>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">E-mail</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Card: Compartilhamento Viral */}
-          <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Share2 className="text-indigo-600 h-5 w-5" />
+          <Card className="border border-slate-200 shadow-sm bg-white rounded-xl h-full">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base font-semibold text-slate-800">
                 Alcance Viral
               </CardTitle>
-              <CardDescription>
-                Quantas vezes perfis foram compartilhados.
-              </CardDescription>
+              <CardDescription>Acionamentos do botão de compartilhar perfil.</CardDescription>
             </CardHeader>
-            <CardContent className="flex items-center justify-center h-[140px]">
-              <div className="text-center">
-                <div className="text-5xl font-extrabold text-indigo-600 mb-2">
-                  {data?.perfilCompartilhado || 0}
+            <CardContent className="flex items-center justify-center h-[116px]">
+              <div className="text-center flex flex-col items-center gap-1">
+                <div className="flex items-baseline gap-2 text-indigo-600">
+                  <Share2 size={24} strokeWidth={2.5} className="mb-1" />
+                  <span className="text-4xl font-extrabold tracking-tight">{data?.perfilCompartilhado || 0}</span>
                 </div>
-                <p className="text-sm text-gray-500 font-medium uppercase tracking-wide">
-                  Compartilhamentos
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  via botão "Compartilhar Perfil"
+                <p className="text-xs text-slate-400 font-medium mt-1">
+                  Compartilhamentos totais
                 </p>
               </div>
             </CardContent>
@@ -454,68 +386,38 @@ export default function AdminIndicadoresPage() {
         </div>
 
         {/* 4. GRÁFICOS PRINCIPAIS */}
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-4 print-break-inside-avoid">
-          Análise de Mercado
-        </h2>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print-break-inside-avoid">
           {/* OFERTA DE MEIS */}
-          <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
+          <Card className="border border-slate-200 shadow-sm bg-white rounded-xl h-full">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Lightbulb className="text-blue-600 h-5 w-5" />
-                Oferta de MEIs
+              <CardTitle className="text-base font-semibold text-slate-800">
+                Oferta de MEIs por Categoria
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer config={configMeis} className="h-[300px] w-full">
+              <ChartContainer config={configMeis} className="h-[280px] w-full">
                 <BarChart
                   data={data?.chartMeisPorCategoria}
                   margin={{ top: 20, right: 10, left: 10, bottom: 40 }}
                 >
-                  <CartesianGrid
-                    vertical={false}
-                    strokeDasharray="3 3"
-                    stroke="#e5e7eb"
-                  />
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis
                     dataKey="categoria"
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fontSize: 11, fill: "#666" }}
+                    tick={{ fontSize: 11, fill: "#94a3b8" }}
                     interval={0}
                     angle={-45}
                     textAnchor="end"
                     tickFormatter={(value) => value.split(" ")[0]}
                   />
-                  <YAxis
-                    allowDecimals={false}
-                    width={30}
-                    tick={{ fontSize: 11, fill: "#666" }}
-                  />
-                  <ChartTooltip
-                    cursor={hoverCursorColor}
-                    content={
-                      <ChartTooltipContent
-                        indicator="line"
-                        className="bg-white border border-gray-200 shadow-xl"
-                      />
-                    }
-                  />
+                  <YAxis allowDecimals={false} width={30} tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                  <ChartTooltip cursor={hoverCursorColor} content={<ChartTooltipContent indicator="line" className="bg-white border-slate-200 shadow-xl" />} />
                   <Bar dataKey="qtd" radius={[4, 4, 0, 0]}>
-                    <LabelList
-                      dataKey="qtd"
-                      position="top"
-                      style={{ fill: "#666", fontSize: 12, fontWeight: "bold" }}
-                    />
-                    {data?.chartMeisPorCategoria?.map(
-                      (entry: any, index: number) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={getCategoryColor(entry.categoria)}
-                        />
-                      ),
-                    )}
+                    <LabelList dataKey="qtd" position="top" style={{ fill: "#64748b", fontSize: 11, fontWeight: "600" }} />
+                    {data?.chartMeisPorCategoria?.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={getCategoryColor(entry.categoria)} />
+                    ))}
                   </Bar>
                 </BarChart>
               </ChartContainer>
@@ -523,57 +425,35 @@ export default function AdminIndicadoresPage() {
           </Card>
 
           {/* INTERESSE PÚBLICO */}
-          <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
+          <Card className="border border-slate-200 shadow-sm bg-white rounded-xl h-full">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <BarChart3 className="text-purple-600 h-5 w-5" />
-                Interesse Público
+              <CardTitle className="text-base font-semibold text-slate-800">
+                Interesse do Público
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer config={configViews} className="h-[300px] w-full">
+              <ChartContainer config={configViews} className="h-[280px] w-full">
                 <BarChart
                   data={data?.chartVisualizacoesPorCategoria}
                   margin={{ top: 20, right: 10, left: 10, bottom: 40 }}
                 >
-                  <CartesianGrid
-                    vertical={false}
-                    strokeDasharray="3 3"
-                    stroke="#e5e7eb"
-                  />
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis
                     dataKey="categoria"
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fontSize: 11, fill: "#666" }}
+                    tick={{ fontSize: 11, fill: "#94a3b8" }}
                     interval={0}
                     angle={-45}
                     textAnchor="end"
                   />
                   <YAxis hide />
-                  <ChartTooltip
-                    cursor={hoverCursorColor}
-                    content={
-                      <ChartTooltipContent
-                        indicator="line"
-                        className="bg-white border border-gray-200 shadow-xl"
-                      />
-                    }
-                  />
+                  <ChartTooltip cursor={hoverCursorColor} content={<ChartTooltipContent indicator="line" className="bg-white border-slate-200 shadow-xl" />} />
                   <Bar dataKey="views" radius={[4, 4, 0, 0]}>
-                    <LabelList
-                      dataKey="views"
-                      position="top"
-                      style={{ fill: "#666", fontSize: 12, fontWeight: "bold" }}
-                    />
-                    {data?.chartVisualizacoesPorCategoria?.map(
-                      (entry: any, index: number) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={getCategoryColor(entry.categoria)}
-                        />
-                      ),
-                    )}
+                    <LabelList dataKey="views" position="top" style={{ fill: "#64748b", fontSize: 11, fontWeight: "600" }} />
+                    {data?.chartVisualizacoesPorCategoria?.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={getCategoryColor(entry.categoria)} />
+                    ))}
                   </Bar>
                 </BarChart>
               </ChartContainer>
@@ -581,110 +461,52 @@ export default function AdminIndicadoresPage() {
           </Card>
         </div>
 
-        {/* 5. OUTROS GRÁFICOS (Notas, Escala, Vendas, Cursos) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print-break-inside-avoid">
-          <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
+        {/* 5. OUTROS GRÁFICOS */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print-break-inside-avoid pb-8">
+          <Card className="border border-slate-200 shadow-sm bg-white rounded-xl h-full">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <TrendingUp className="text-blue-500 h-5 w-5" />
-                Notas
+              <CardTitle className="text-base font-semibold text-slate-800">
+                Distribuição de Notas
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer config={configNotas} className="h-[250px] w-full">
+              <ChartContainer config={configNotas} className="h-[240px] w-full">
                 <BarChart
                   data={data?.chartDistribuicaoNotas}
                   margin={{ top: 20, right: 10, left: 10, bottom: 0 }}
                 >
-                  <CartesianGrid
-                    vertical={false}
-                    strokeDasharray="3 3"
-                    stroke="#e5e7eb"
-                  />
-                  <XAxis
-                    dataKey="nota"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ fontSize: 12, fill: "#666" }}
-                    dy={10}
-                  />
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="nota" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#94a3b8" }} dy={10} />
                   <YAxis hide />
-                  <ChartTooltip
-                    cursor={hoverCursorColor}
-                    content={
-                      <ChartTooltipContent
-                        indicator="line"
-                        className="bg-white border border-gray-200 shadow-xl"
-                      />
-                    }
-                  />
-                  <Bar
-                    dataKey="qtd"
-                    fill="var(--color-qtd)"
-                    radius={[8, 8, 0, 0]}
-                  >
-                    <LabelList
-                      dataKey="qtd"
-                      position="top"
-                      style={{ fill: "#666", fontSize: 12, fontWeight: "bold" }}
-                    />
+                  <ChartTooltip cursor={hoverCursorColor} content={<ChartTooltipContent indicator="line" className="bg-white border-slate-200 shadow-xl" />} />
+                  <Bar dataKey="qtd" fill="var(--color-qtd)" radius={[6, 6, 0, 0]}>
+                    <LabelList dataKey="qtd" position="top" style={{ fill: "#64748b", fontSize: 11, fontWeight: "600" }} />
                   </Bar>
                 </BarChart>
               </ChartContainer>
             </CardContent>
           </Card>
 
-          <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
+          <Card className="border border-slate-200 shadow-sm bg-white rounded-xl h-full">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <CheckCircle className="text-yellow-500 h-5 w-5" />
-                Escala
+              <CardTitle className="text-base font-semibold text-slate-800">
+                Estágio dos Negócios
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer
-                config={configEscalaNegocio}
-                className="h-[250px] w-full"
-              >
+              <ChartContainer config={configEscalaNegocio} className="h-[240px] w-full">
                 <BarChart
                   data={data?.chartEscalaNegocio}
                   layout="vertical"
-                  margin={{ left: 0, right: 40, top: 10, bottom: 10 }}
-                  barSize={24}
+                  margin={{ left: 0, right: 30, top: 0, bottom: 0 }}
+                  barSize={20}
                 >
-                  <CartesianGrid
-                    horizontal={false}
-                    strokeDasharray="3 3"
-                    stroke="#e5e7eb"
-                  />
-                  <YAxis
-                    dataKey="label"
-                    type="category"
-                    tickLine={false}
-                    axisLine={false}
-                    width={100}
-                    tick={{ fontSize: 11, fill: "#666" }}
-                  />
+                  <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <YAxis dataKey="label" type="category" tickLine={false} axisLine={false} width={100} tick={{ fontSize: 11, fill: "#94a3b8" }} />
                   <XAxis dataKey="value" type="number" hide />
-                  <ChartTooltip
-                    cursor={hoverCursorColor}
-                    content={
-                      <ChartTooltipContent
-                        indicator="line"
-                        className="bg-white border border-gray-200 shadow-xl"
-                      />
-                    }
-                  />
-                  <Bar
-                    dataKey="value"
-                    fill="var(--color-value)"
-                    radius={[0, 4, 4, 0]}
-                  >
-                    <LabelList
-                      dataKey="value"
-                      position="right"
-                      style={{ fontSize: 12, fontWeight: "bold", fill: "#666" }}
-                    />
+                  <ChartTooltip cursor={hoverCursorColor} content={<ChartTooltipContent indicator="line" className="bg-white border-slate-200 shadow-xl" />} />
+                  <Bar dataKey="value" fill="var(--color-value)" radius={[0, 4, 4, 0]}>
+                    <LabelList dataKey="value" position="right" style={{ fontSize: 11, fontWeight: "600", fill: "#64748b" }} />
                   </Bar>
                 </BarChart>
               </ChartContainer>
@@ -692,102 +514,68 @@ export default function AdminIndicadoresPage() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print-break-inside-avoid">
-          <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print-break-inside-avoid pb-8">
+          <Card className="border border-slate-200 shadow-sm bg-white rounded-xl h-full">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <ShoppingCart className="text-emerald-600 h-5 w-5" />
-                Canais de Venda
+              <CardTitle className="text-base font-semibold text-slate-800">
+                Canais de Venda Ativos
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer
-                config={configVendas}
-                className="h-[300px] w-full"
-              >
+              <ChartContainer config={configVendas} className="h-[280px] w-full">
                 <BarChart
                   data={data?.chartVendas}
                   layout="vertical"
-                  margin={{ left: 0, right: 40, top: 10, bottom: 10 }}
-                  barSize={24}
+                  margin={{ left: 0, right: 30, top: 0, bottom: 0 }}
+                  barSize={20}
                 >
-                  <CartesianGrid
-                    horizontal={false}
-                    strokeDasharray="3 3"
-                    stroke="#e5e7eb"
-                  />
-                  <YAxis
-                    dataKey="canal"
-                    type="category"
-                    tickLine={false}
-                    axisLine={false}
-                    width={130}
-                    tick={{ fontSize: 11, fill: "#666" }}
-                  />
+                  <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <YAxis dataKey="canal" type="category" tickLine={false} axisLine={false} width={130} tick={{ fontSize: 11, fill: "#94a3b8" }} />
                   <XAxis dataKey="qtd" type="number" hide />
-                  <ChartTooltip
-                    cursor={hoverCursorColor}
-                    content={
-                      <ChartTooltipContent
-                        indicator="line"
-                        className="bg-white border border-gray-200 shadow-xl"
-                      />
-                    }
-                  />
-                  <Bar
-                    dataKey="qtd"
-                    fill="var(--color-qtd)"
-                    radius={[0, 4, 4, 0]}
-                  >
-                    <LabelList
-                      dataKey="qtd"
-                      position="right"
-                      style={{ fontSize: 12, fontWeight: "bold", fill: "#666" }}
-                    />
+                  <ChartTooltip cursor={hoverCursorColor} content={<ChartTooltipContent indicator="line" className="bg-white border-slate-200 shadow-xl" />} />
+                  <Bar dataKey="qtd" fill="var(--color-qtd)" radius={[0, 4, 4, 0]}>
+                    <LabelList dataKey="qtd" position="right" style={{ fontSize: 11, fontWeight: "600", fill: "#64748b" }} />
                   </Bar>
                 </BarChart>
               </ChartContainer>
             </CardContent>
           </Card>
 
-          <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
+          <Card className="border border-slate-200 shadow-sm bg-white rounded-xl h-full">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <GraduationCap className="text-amber-600 h-5 w-5" />
-                Interesse em Cursos
+              <CardTitle className="text-base font-semibold text-slate-800">
+                Interesse em Cursos (Top 5)
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-5">
+              <div className="space-y-4 pt-2">
                 {data?.chartCursos?.map((item: any, index: number) => {
-                  const maxVal =
-                    Math.max(...data.chartCursos.map((i: any) => i.qtd)) || 1;
-                  const percent = (item.qtd / maxVal) * 100;
+                  const maxVal = Math.max(...(data.chartCursos?.map((i: any) => i.qtd) || [1]));
+                  const percent = (item.qtd / (maxVal || 1)) * 100;
                   return (
-                    <div key={index} className="space-y-1">
+                    <div key={index} className="space-y-1.5">
                       <div className="flex items-center justify-between text-sm">
-                        <span
-                          className="font-medium text-gray-700 truncate pr-4"
-                          title={item.curso}
-                        >
+                        <span className="font-medium text-slate-700 truncate pr-4 text-[13px]" title={item.curso}>
                           {item.curso}
                         </span>
-                        <span className="font-bold text-gray-900">
+                        <span className="font-semibold text-slate-900 text-xs">
                           {item.qtd}
                         </span>
                       </div>
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-amber-500 rounded-full"
-                          style={{ width: `${percent}%` }}
+                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percent}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className="h-full bg-slate-800 rounded-full"
                         />
                       </div>
                     </div>
                   );
                 })}
                 {(!data?.chartCursos || data.chartCursos.length === 0) && (
-                  <p className="text-sm text-gray-500 text-center py-4">
-                    Nenhum dado registrado ainda.
+                  <p className="text-sm text-slate-400 text-center py-8">
+                    Nenhum curso registrado.
                   </p>
                 )}
               </div>
