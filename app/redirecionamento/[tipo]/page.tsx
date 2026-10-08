@@ -27,11 +27,7 @@ const RedirecionamentoPage = ({ params }: { params: { tipo: string } }) => {
 
   useEffect(() => {
     if (countdown <= 0) {
-      if (params.tipo === "mei") {
-        router.push("/espaco-mei");
-      } else {
-        router.push("/");
-      }
+      router.push("/");
       return;
     }
 
