@@ -21,12 +21,12 @@ import {
   Users,
   ShoppingCart,
   GraduationCap,
-  Printer, 
-  Download, 
-  Share2, 
-  ExternalLink, 
-  MessageCircle, 
-  Mail, 
+  Printer,
+  Download,
+  Share2,
+  ExternalLink,
+  MessageCircle,
+  Mail,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getAdminStats } from "@/lib/api";
@@ -157,62 +157,53 @@ export default function AdminIndicadoresPage() {
     );
   }
 
-  const SummaryCard = ({
-    title,
-    value,
-    icon: Icon,
-    colorBg,
-    colorText,
-    suffix,
-  }: any) => (
+  // --- CARD LEVE (Inspirado nos cards da parte de baixo) ---
+  const LightMetricCard = ({ title, value, icon: Icon, iconColor, suffix }: any) => (
+    <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base font-semibold text-gray-700">
+          <Icon className={`h-5 w-5 ${iconColor}`} />
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-3xl font-bold text-gray-900">{value}</span>
+          {suffix && (
+            <span className="text-sm font-semibold text-gray-500">
+              {suffix}
+            </span>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // --- CARD ANZOL ESCURO COM ANIMAÇÃO AZUL ---
+  const DarkAnzolCard = ({ title, value, icon: Icon }: any) => (
     <motion.div
-      whileHover={{ y: -4, scale: 1.01 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className="h-full"
+      whileHover={{
+        backgroundColor: "rgba(30, 58, 138, 0.4)", // Fundo azul escuro translúcido no hover
+        boxShadow: "inset 0 -3px 0 0 #3b82f6", // Borda inferior azul acendendo
+      }}
+      transition={{ duration: 0.2 }}
+      className="p-6 flex flex-col justify-center relative group cursor-default"
     >
-      <Card
-        className="border-none shadow-sm h-full print:shadow-none print:border print:border-gray-200 overflow-hidden"
-        style={{ background: colorBg }}
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2 group-hover:text-blue-300 transition-colors">
+        <Icon className="h-4 w-4 text-blue-500 group-hover:text-blue-400 transition-colors" />{" "}
+        {title}
+      </p>
+      <motion.p 
+        className="text-3xl font-bold text-white tracking-tight origin-left"
+        whileHover={{ scale: 1.05 }}
       >
-        <CardContent className="p-6 flex items-center justify-between relative h-full">
-          <div className="relative z-10">
-            <p
-              className="font-medium uppercase text-xs tracking-wider mb-1"
-              style={{ color: colorText, opacity: 0.8 }}
-            >
-              {title}
-            </p>
-            <div className="flex items-baseline">
-              <span
-                className="text-3xl font-extrabold"
-                style={{ color: colorText }}
-              >
-                {value}
-              </span>
-              {suffix && (
-                <span
-                  className="text-sm font-semibold ml-2 opacity-70"
-                  style={{ color: colorText }}
-                >
-                  {suffix}
-                </span>
-              )}
-            </div>
-          </div>
-          <div
-            className="p-3 rounded-full bg-white/20 print:bg-transparent relative z-10"
-            style={{ color: colorText }}
-          >
-            <Icon size={28} />
-          </div>
-        </CardContent>
-      </Card>
+        {value}
+      </motion.p>
     </motion.div>
   );
 
   return (
-    <div className="p-6 min-h-screen bg-[#f4f7fe] print:bg-white print:p-0">
+    <div className="p-4 md:p-8 min-h-screen bg-[#f8fafc] print:bg-white print:p-0">
       {/* Estilos Globais para Impressão */}
       <style jsx global>{`
         @media print {
@@ -233,141 +224,147 @@ export default function AdminIndicadoresPage() {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* CABEÇALHO */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* ================= CABEÇALHO E BOTÕES ================= */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <Link href="/admin/dashboard" className="no-print">
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+              >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                 Painel de Indicadores
               </h1>
-              <p className="text-gray-500">
-                Visão geral do ecossistema MeiDeSaquá.
+              <p className="text-sm text-gray-500 font-medium">
+                Visão geral e desempenho do sistema.
               </p>
             </div>
           </div>
 
-          {/* BOTÕES DE AÇÃO (Escondidos na impressão) */}
-          <div className="flex gap-2 no-print">
+          {/* Botões Redesenhados */}
+          <div className="flex items-center gap-3 no-print">
             <Button
               variant="outline"
               onClick={handlePrint}
-              className="flex gap-2"
+              className="h-10 px-4 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm rounded-lg transition-all flex items-center gap-2"
             >
               <Printer className="h-4 w-4" />
-              Imprimir
+              <span className="font-medium">Imprimir</span>
             </Button>
             <Button
               onClick={handleExport}
-              className="bg-green-600 hover:bg-green-700 flex gap-2"
+              className="h-10 px-4 bg-[#107c41] hover:bg-[#0c5e31] text-white shadow-sm rounded-lg transition-all flex items-center gap-2"
             >
               <Download className="h-4 w-4" />
-              Exportar CSV
+              <span className="font-medium">Exportar CSV</span>
             </Button>
           </div>
         </div>
 
-        {/* 1. CARDS DE RESUMO GERAL */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SummaryCard
+        {/* ================= 1. CARDS DE RESUMO GERAL ================= */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <LightMetricCard
             title="MEIs Ativos"
             value={data?.totalMeis}
             icon={Lightbulb}
-            colorBg="#E6F7FF"
-            colorText="#0050B3"
+            iconColor="text-blue-600"
           />
-          <SummaryCard
+          <LightMetricCard
             title="Média Geral"
             value={data?.mediaAvaliacao}
             icon={TrendingUp}
-            colorBg="#FFF7E6"
-            colorText="#D46B08"
+            iconColor="text-orange-500"
             suffix="/ 5.0"
           />
-          <SummaryCard
+          <LightMetricCard
             title="Comentários"
             value={data?.totalAvaliacoes}
             icon={CheckCircle}
-            colorBg="#FFF0F6"
-            colorText="#C41D7F"
+            iconColor="text-pink-600"
           />
         </div>
 
-        {/* 2. CARDS DE TRÁFEGO */}
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-8">
-          Tráfego e Engajamento
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <SummaryCard
-            title="Usuários"
-            value={data?.totalUsuarios || 0}
-            icon={Users}
-            colorBg="#F6FFED"
-            colorText="#389E0D"
-          />
-          <SummaryCard
-            title="Espaço MEI"
-            value={data?.pageViews?.espacoMei || 0}
-            icon={Globe}
-            colorBg="#F0F5FF"
-            colorText="#2F54EB"
-          />
-          <SummaryCard
-            title="Categ. Visitadas"
-            value={data?.pageViews?.categoriasTotal || 0}
-            icon={MousePointerClick}
-            colorBg="#FFF2E8"
-            colorText="#D4380D"
-          />
+        {/* ================= 2. CARDS DE TRÁFEGO ================= */}
+        <div className="space-y-4">
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest print-break-inside-avoid">
+            Tráfego e Engajamento
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <LightMetricCard
+              title="Usuários"
+              value={data?.totalUsuarios || 0}
+              icon={Users}
+              iconColor="text-emerald-600"
+            />
+            <LightMetricCard
+              title="Espaço MEI"
+              value={data?.pageViews?.espacoMei || 0}
+              icon={Globe}
+              iconColor="text-indigo-600"
+            />
+            <LightMetricCard
+              title="Categorias Visitadas"
+              value={data?.pageViews?.categoriasTotal || 0}
+              icon={MousePointerClick}
+              iconColor="text-red-500"
+            />
+          </div>
         </div>
 
-        {/* 2.5 CARDS ANZOL */}
-        <h2 className="text-xs font-bold text-slate-800 uppercase tracking-widest mt-8">
-          Métricas de Campanha (ANZOL)
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          <SummaryCard
-            title="Acesso Home (GERAL)"
-            value={data?.pageViews?.home || 0}
-            icon={Home}
-            colorBg="#0f172a"
-            colorText="#ffffff"
-          />
-          <SummaryCard
-            title="Home (Orgânico)"
-            value={Math.max(0, (data?.pageViews?.home || 0) - ((data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)))}
-            icon={Home}
-            colorBg="#1e293b"
-            colorText="#bfdbfe"
-          />
-          <SummaryCard
-            title="ANZOL (Geral)"
-            value={(data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)}
-            icon={ExternalLink}
-            colorBg="#0ea5e9"
-            colorText="#ffffff"
-          />
-          <SummaryCard
-            title="ANZOL (MEI)"
-            value={data?.pageViews?.redirecionamentoMei || 0}
-            icon={ExternalLink}
-            colorBg="#1e293b"
-            colorText="#38bdf8"
-          />
-          <SummaryCard
-            title="ANZOL (Usuário)"
-            value={data?.pageViews?.redirecionamentoUsuario || 0}
-            icon={ExternalLink}
-            colorBg="#1e293b"
-            colorText="#38bdf8"
-          />
-        </div>
+        {/* ================= 2.5 CARDS ANZOL (ESCURO + AZUL) ================= */}
+        <div className="space-y-4 mb-8">
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest print-break-inside-avoid">
+            Métricas de Campanha (Anzol)
+          </h2>
+          
+          <div className="bg-slate-900 border border-slate-800 shadow-lg rounded-xl overflow-hidden print-break-inside-avoid relative">
+            {/* Gradiente sutil de fundo para dar profundidade */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 via-transparent to-blue-900/10 pointer-events-none"></div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-slate-800 relative z-10">
+              <DarkAnzolCard
+                title="Home (Geral)"
+                value={data?.pageViews?.home || 0}
+                icon={Home}
+              />
+              <DarkAnzolCard
+                title="Orgânico"
+                value={Math.max(
+                  0,
+                  (data?.pageViews?.home || 0) -
+                    ((data?.pageViews?.redirecionamentoMei || 0) +
+                      (data?.pageViews?.redirecionamentoUsuario || 0))
+                )}
+                icon={Home}
+              />
+              <DarkAnzolCard
+                title="Anzol (Geral)"
+                value={
+                  (data?.pageViews?.redirecionamentoMei || 0) +
+                  (data?.pageViews?.redirecionamentoUsuario || 0)
+                }
+                icon={ExternalLink}
+              />
+              <DarkAnzolCard
+                title="Anzol (MEI)"
+                value={data?.pageViews?.redirecionamentoMei || 0}
+                icon={ExternalLink}
+              />
+              <DarkAnzolCard
+                title="Anzol (Usuário)"
+                value={data?.pageViews?.redirecionamentoUsuario || 0}
+                icon={ExternalLink}
+              />
+            </div>
+          </div>
+        </div>
         {/* --- 3. NOVOS CARDS: INTERAÇÕES E COMPARTILHAMENTO --- */}
         <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-8 print-break-inside-avoid">
           Interações e Alcance
