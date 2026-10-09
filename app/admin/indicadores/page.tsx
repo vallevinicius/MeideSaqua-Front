@@ -157,7 +157,7 @@ export default function AdminIndicadoresPage() {
     );
   }
 
-  // --- CARD LEVE (Inspirado nos cards da parte de baixo) ---
+  // --- CARD LEVE ---
   const LightMetricCard = ({ title, value, icon: Icon, iconColor, suffix }: any) => (
     <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
       <CardHeader className="pb-2">
@@ -179,22 +179,22 @@ export default function AdminIndicadoresPage() {
     </Card>
   );
 
-  // --- CARD ANZOL ESCURO COM ANIMAÇÃO AZUL ---
-  const DarkAnzolCard = ({ title, value, icon: Icon }: any) => (
+  // --- CARD ANZOL INTERATIVO (Fundo claro, destaca em azul no hover) ---
+  const InteractiveAnzolCard = ({ title, value, icon: Icon }: any) => (
     <motion.div
       whileHover={{
-        backgroundColor: "rgba(30, 58, 138, 0.4)", // Fundo azul escuro translúcido no hover
-        boxShadow: "inset 0 -3px 0 0 #3b82f6", // Borda inferior azul acendendo
+        backgroundColor: "#eff6ff", // bg-blue-50
+        boxShadow: "inset 0 -3px 0 0 #3b82f6", // borda inferior acendendo
       }}
       transition={{ duration: 0.2 }}
       className="p-6 flex flex-col justify-center relative group cursor-default"
     >
-      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2 group-hover:text-blue-300 transition-colors">
-        <Icon className="h-4 w-4 text-blue-500 group-hover:text-blue-400 transition-colors" />{" "}
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2 group-hover:text-blue-700 transition-colors">
+        <Icon className="h-4 w-4 text-blue-500 group-hover:text-blue-600 transition-colors" />{" "}
         {title}
       </p>
       <motion.p 
-        className="text-3xl font-bold text-white tracking-tight origin-left"
+        className="text-3xl font-bold text-gray-900 tracking-tight origin-left group-hover:text-blue-900 transition-colors"
         whileHover={{ scale: 1.05 }}
       >
         {value}
@@ -318,23 +318,20 @@ export default function AdminIndicadoresPage() {
           </div>
         </div>
 
-        {/* ================= 2.5 CARDS ANZOL (ESCURO + AZUL) ================= */}
+        {/* ================= 2.5 CARDS ANZOL ================= */}
         <div className="space-y-4 mb-8">
           <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest print-break-inside-avoid">
             Métricas de Campanha (Anzol)
           </h2>
           
-          <div className="bg-slate-900 border border-slate-800 shadow-lg rounded-xl overflow-hidden print-break-inside-avoid relative">
-            {/* Gradiente sutil de fundo para dar profundidade */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 via-transparent to-blue-900/10 pointer-events-none"></div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-slate-800 relative z-10">
-              <DarkAnzolCard
+          <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden print-break-inside-avoid">
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+              <InteractiveAnzolCard
                 title="Home (Geral)"
                 value={data?.pageViews?.home || 0}
                 icon={Home}
               />
-              <DarkAnzolCard
+              <InteractiveAnzolCard
                 title="Orgânico"
                 value={Math.max(
                   0,
@@ -344,7 +341,7 @@ export default function AdminIndicadoresPage() {
                 )}
                 icon={Home}
               />
-              <DarkAnzolCard
+              <InteractiveAnzolCard
                 title="Anzol (Geral)"
                 value={
                   (data?.pageViews?.redirecionamentoMei || 0) +
@@ -352,12 +349,12 @@ export default function AdminIndicadoresPage() {
                 }
                 icon={ExternalLink}
               />
-              <DarkAnzolCard
+              <InteractiveAnzolCard
                 title="Anzol (MEI)"
                 value={data?.pageViews?.redirecionamentoMei || 0}
                 icon={ExternalLink}
               />
-              <DarkAnzolCard
+              <InteractiveAnzolCard
                 title="Anzol (Usuário)"
                 value={data?.pageViews?.redirecionamentoUsuario || 0}
                 icon={ExternalLink}
@@ -365,6 +362,11 @@ export default function AdminIndicadoresPage() {
             </div>
           </div>
         </div>
+
+        {/* ==================================================================================== */}
+        {/* ======================= DAQUI PARA BAIXO FOI MANTIDO INTACTO ======================= */}
+        {/* ==================================================================================== */}
+
         {/* --- 3. NOVOS CARDS: INTERAÇÕES E COMPARTILHAMENTO --- */}
         <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-8 print-break-inside-avoid">
           Interações e Alcance
