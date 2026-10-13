@@ -269,6 +269,21 @@ describe("funções que usam fetch direto", () => {
   });
 });
 
+describe("relatório de campanha (disparo manual)", () => {
+  it("POST com cookies, marcador de sessão e devolve a resposta; erro mostra a mensagem do servidor", async () => {
+    const { dispararRelatorioCampanha } = await api();
+    fetchMock.mockImplementationOnce(() => resposta({ enviado: true }));
+    expect(await dispararRelatorioCampanha("sessao-por-cookie")).toEqual({ enviado: true });
+    const { url, opcoes } = ultima();
+    expect(url).toBe("http://api.teste/api/admin/relatorios/campanha-anzol/disparar");
+    expect(opcoes.method).toBe("POST");
+    expect(opcoes.credentials).toBe("include");
+
+    fetchMock.mockImplementationOnce(() => resposta({ message: "Já enviado hoje" }, 429));
+    await expect(dispararRelatorioCampanha("sessao-por-cookie")).rejects.toThrow("Já enviado hoje");
+  });
+});
+
 describe("utilitários do módulo", () => {
   it("removeEmojis", async () => {
     const { removeEmojis } = await api();

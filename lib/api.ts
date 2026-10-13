@@ -503,6 +503,7 @@ export async function dispararRelatorioCampanha(token: string) {
     `${API_URL}/api/admin/relatorios/campanha-anzol/disparar`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
