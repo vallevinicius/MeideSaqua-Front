@@ -29,6 +29,8 @@ import {
   Mail,
   Loader2,
   Send,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getAdminStats, dispararRelatorioCampanha } from "@/lib/api";
@@ -102,6 +104,7 @@ export default function AdminIndicadoresPage() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [isSendingReport, setIsSendingReport] = useState(false);
   const [data, setData] = useState<any>(null);
+  const [cursosPage, setCursosPage] = useState(0);
   const router = useRouter();
 
   const fetchStats = async (range?: DateRange) => {
@@ -123,6 +126,7 @@ export default function AdminIndicadoresPage() {
 
       const stats = await getAdminStats(token, startStr, endStr);
       setData(stats);
+      setCursosPage(0);
     } catch (error) {
       console.error("Falha ao buscar estatísticas do painel:", error);
     } finally {
@@ -873,49 +877,96 @@ export default function AdminIndicadoresPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <GraduationCap className="text-amber-600 h-5 w-5" />
-                Interesse em Cursos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-5">
-                {data?.chartCursos?.map((item: any, index: number) => {
-                  const maxVal =
-                    Math.max(...data.chartCursos.map((i: any) => i.qtd)) || 1;
-                  const percent = (item.qtd / maxVal) * 100;
-                  return (
-                    <div key={index} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span
-                          className="font-medium text-gray-700 truncate pr-4"
-                          title={item.curso}
+          {(() => {
+            const CURSOS_PER_PAGE = 5;
+            const listaCursos = data?.chartCursos || [];
+            const totalCursosPages = Math.ceil(listaCursos.length / CURSOS_PER_PAGE);
+            const displayedCursos = listaCursos.slice(
+              cursosPage * CURSOS_PER_PAGE,
+              (cursosPage + 1) * CURSOS_PER_PAGE
+            );
+            const maxValCursos =
+              listaCursos.length > 0
+                ? Math.max(...listaCursos.map((i: any) => i.qtd)) || 1
+                : 1;
+
+            return (
+              <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full flex flex-col">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <GraduationCap className="text-amber-600 h-5 w-5" />
+                    Interesse em Cursos
+                  </CardTitle>
+                  {totalCursosPages > 1 && (
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                      <span>
+                        {cursosPage + 1} de {totalCursosPages}
+                      </span>
+                      <div className="flex items-center gap-0.5 ml-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-gray-500 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:pointer-events-none"
+                          onClick={() => setCursosPage((prev) => Math.max(0, prev - 1))}
+                          disabled={cursosPage === 0}
+                          title="Página anterior"
                         >
-                          {item.curso}
-                        </span>
-                        <span className="font-bold text-gray-900">
-                          {item.qtd}
-                        </span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-amber-500 rounded-full"
-                          style={{ width: `${percent}%` }}
-                        />
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-gray-500 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:pointer-events-none"
+                          onClick={() =>
+                            setCursosPage((prev) => Math.min(totalCursosPages - 1, prev + 1))
+                          }
+                          disabled={cursosPage >= totalCursosPages - 1}
+                          title="Próxima página"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                  );
-                })}
-                {(!data?.chartCursos || data.chartCursos.length === 0) && (
-                  <p className="text-sm text-gray-500 text-center py-4">
-                    Nenhum dado registrado ainda.
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  )}
+                </CardHeader>
+                <CardContent className="flex-1">
+                  <div className="space-y-4">
+                    {displayedCursos.map((item: any, index: number) => {
+                      const percent = (item.qtd / maxValCursos) * 100;
+                      return (
+                        <div key={index} className="space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <span
+                              className="font-medium text-gray-700 truncate pr-4"
+                              title={item.curso}
+                            >
+                              {item.curso}
+                            </span>
+                            <span className="font-bold text-gray-900">
+                              {item.qtd}
+                            </span>
+                          </div>
+                          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-amber-500 rounded-full transition-all duration-300"
+                              style={{ width: `${percent}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {listaCursos.length === 0 && (
+                      <p className="text-sm text-gray-500 text-center py-4">
+                        Nenhum dado registrado ainda.
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
       </motion.div>
       </div>
