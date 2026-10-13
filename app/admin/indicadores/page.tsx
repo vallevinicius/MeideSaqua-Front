@@ -21,17 +21,27 @@ import {
   Users,
   ShoppingCart,
   GraduationCap,
-  Printer, 
-  Download, 
-  Share2, 
-  ExternalLink, 
-  MessageCircle, 
-  Mail, 
+  Printer,
+  Download,
+  Share2,
+  ExternalLink,
+  MessageCircle,
+  Mail,
+  Loader2,
+  Send,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getAdminStats } from "@/lib/api";
+import { getAdminStats, dispararRelatorioCampanha } from "@/lib/api";
+import { toast } from "sonner";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { CalendarRange } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -91,28 +101,52 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AdminIndicadoresPage() {
   const [loading, setLoading] = useState(true);
+  const [isFiltering, setIsFiltering] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [isSendingReport, setIsSendingReport] = useState(false);
   const [data, setData] = useState<any>(null);
+  const [cursosPage, setCursosPage] = useState(0);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      const token = getAdminToken();
+  const fetchStats = async (range?: DateRange) => {
+    const token = getAdminToken();
 
-      if (!token) {
-        router.push("/admin/login");
-        return;
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+    try {
+      setIsFiltering(true);
+      let startStr: string | undefined = undefined;
+      let endStr: string | undefined = undefined;
+
+      if (range?.from) {
+        startStr = format(range.from, "yyyy-MM-dd");
+        endStr = range.to ? format(range.to, "yyyy-MM-dd") : startStr;
       }
-      try {
-        const stats = await getAdminStats(token);
-        setData(stats);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+
+      const stats = await getAdminStats(token, startStr, endStr);
+      setData(stats);
+      setCursosPage(0);
+    } catch (error) {
+      console.error("Falha ao buscar estatísticas do painel:", error);
+    } finally {
+      setIsFiltering(false);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStats();
   }, [router]);
+
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    // Se o usuário selecionou o range completo ou limpou o filtro
+    if (!range || (range.from && range.to)) {
+      fetchStats(range);
+    }
+  };
 
   // --- FUNÇÃO PARA EXPORTAR CSV ---
   const handleExport = async () => {
@@ -151,6 +185,32 @@ export default function AdminIndicadoresPage() {
     window.print();
   };
 
+  // --- FUNÇÃO PARA DISPARAR RELATÓRIO DE CAMPANHA ANZOL POR E-MAIL ---
+  const handleEnviarRelatorioAnzol = async () => {
+    const token = getAdminToken();
+    if (!token) {
+      toast.error("Sessão expirada. Faça login novamente.");
+      router.push("/admin/login");
+      return;
+    }
+
+    setIsSendingReport(true);
+    try {
+      const res = await dispararRelatorioCampanha(token);
+      const dests =
+        res.destinatarios && res.destinatarios.length > 0
+          ? res.destinatarios.join(", ")
+          : "os e-mails configurados";
+      toast.success(
+        `Relatório de campanha Anzol enviado com sucesso para: ${dests}`
+      );
+    } catch (error: any) {
+      toast.error(error?.message || "Erro ao disparar relatório por e-mail.");
+    } finally {
+      setIsSendingReport(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -159,62 +219,53 @@ export default function AdminIndicadoresPage() {
     );
   }
 
-  const SummaryCard = ({
-    title,
-    value,
-    icon: Icon,
-    colorBg,
-    colorText,
-    suffix,
-  }: any) => (
+  // --- CARD LEVE ---
+  const LightMetricCard = ({ title, value, icon: Icon, iconColor, suffix }: any) => (
+    <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base font-semibold text-gray-700">
+          <Icon className={`h-5 w-5 ${iconColor}`} />
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-3xl font-bold text-gray-900">{value}</span>
+          {suffix && (
+            <span className="text-sm font-semibold text-gray-500">
+              {suffix}
+            </span>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // --- CARD ANZOL INTERATIVO (Fundo claro, destaca em azul no hover) ---
+  const InteractiveAnzolCard = ({ title, value, icon: Icon }: any) => (
     <motion.div
-      whileHover={{ y: -4, scale: 1.01 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className="h-full"
+      whileHover={{
+        backgroundColor: "#eff6ff", // bg-blue-50
+        boxShadow: "inset 0 -3px 0 0 #3b82f6", // borda inferior acendendo
+      }}
+      transition={{ duration: 0.2 }}
+      className="p-6 flex flex-col justify-center relative group cursor-default"
     >
-      <Card
-        className="border-none shadow-sm h-full print:shadow-none print:border print:border-gray-200 overflow-hidden"
-        style={{ background: colorBg }}
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2 group-hover:text-blue-700 transition-colors">
+        <Icon className="h-4 w-4 text-blue-500 group-hover:text-blue-600 transition-colors" />{" "}
+        {title}
+      </p>
+      <motion.p 
+        className="text-3xl font-bold text-gray-900 tracking-tight origin-left group-hover:text-blue-900 transition-colors"
+        whileHover={{ scale: 1.05 }}
       >
-        <CardContent className="p-6 flex items-center justify-between relative h-full">
-          <div className="relative z-10">
-            <p
-              className="font-medium uppercase text-xs tracking-wider mb-1"
-              style={{ color: colorText, opacity: 0.8 }}
-            >
-              {title}
-            </p>
-            <div className="flex items-baseline">
-              <span
-                className="text-3xl font-extrabold"
-                style={{ color: colorText }}
-              >
-                {value}
-              </span>
-              {suffix && (
-                <span
-                  className="text-sm font-semibold ml-2 opacity-70"
-                  style={{ color: colorText }}
-                >
-                  {suffix}
-                </span>
-              )}
-            </div>
-          </div>
-          <div
-            className="p-3 rounded-full bg-white/20 print:bg-transparent relative z-10"
-            style={{ color: colorText }}
-          >
-            <Icon size={28} />
-          </div>
-        </CardContent>
-      </Card>
+        {value}
+      </motion.p>
     </motion.div>
   );
 
   return (
-    <div className="p-6 min-h-screen bg-[#f4f7fe] print:bg-white print:p-0">
+    <div className="p-4 md:p-8 min-h-screen bg-[#f8fafc] print:bg-white print:p-0">
       {/* Estilos Globais para Impressão */}
       <style jsx global>{`
         @media print {
@@ -235,140 +286,216 @@ export default function AdminIndicadoresPage() {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* CABEÇALHO */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* ================= CABEÇALHO E CONTROLES ================= */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <Link href="/admin/dashboard" className="no-print">
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+              >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                 Painel de Indicadores
               </h1>
-              <p className="text-gray-500">
-                Visão geral do ecossistema MeiDeSaquá.
+              <p className="text-sm text-gray-500 font-medium">
+                Visão geral e desempenho do sistema.
               </p>
             </div>
           </div>
 
-          {/* BOTÕES DE AÇÃO (Escondidos na impressão) */}
-          <div className="flex gap-2 no-print">
+          {/* Filtro de Período e Botões de Ação */}
+          <div className="flex flex-wrap items-center gap-3 no-print">
+            <DateRangePicker
+              value={dateRange}
+              onChange={handleDateRangeChange}
+              disabled={isFiltering}
+            />
+
             <Button
               variant="outline"
               onClick={handlePrint}
-              className="flex gap-2"
+              className="h-10 px-4 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm rounded-lg transition-all flex items-center gap-2"
             >
               <Printer className="h-4 w-4" />
-              Imprimir
+              <span className="font-medium">Imprimir</span>
             </Button>
             <Button
               onClick={handleExport}
-              className="bg-green-600 hover:bg-green-700 flex gap-2"
+              className="h-10 px-4 bg-[#107c41] hover:bg-[#0c5e31] text-white shadow-sm rounded-lg transition-all flex items-center gap-2"
             >
               <Download className="h-4 w-4" />
-              Exportar CSV
+              <span className="font-medium">Exportar CSV</span>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleEnviarRelatorioAnzol}
+              disabled={isSendingReport}
+              className="h-10 px-4 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 shadow-sm rounded-lg transition-all flex items-center gap-2"
+              title="Disparar relatório consolidado com deltas da campanha Anzol por e-mail"
+            >
+              {isSendingReport ? (
+                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+              ) : (
+                <Mail className="h-4 w-4 text-blue-600" />
+              )}
+              <span className="font-medium">
+                {isSendingReport ? "Enviando..." : "Enviar Relatório Anzol"}
+              </span>
             </Button>
           </div>
         </div>
 
-        {/* 1. CARDS DE RESUMO GERAL */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SummaryCard
-            title="MEIs Ativos"
-            value={data?.totalMeis}
+        {/* Banner Informativo de Período Ativo */}
+        <div className="flex items-center justify-between flex-wrap gap-2 px-4 py-2.5 rounded-xl border bg-white border-gray-100 shadow-sm no-print">
+          <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
+            <CalendarRange className="h-4 w-4 text-blue-600" />
+            {dateRange?.from && dateRange?.to ? (
+              <span>
+                Filtrando dados de{" "}
+                <strong className="text-gray-900">
+                  {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })}
+                </strong>{" "}
+                até{" "}
+                <strong className="text-gray-900">
+                  {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
+                </strong>
+                <span className="text-gray-400 ml-1.5 hidden sm:inline">
+                  • rastreamento diário ativo a partir de 13/10/2026
+                </span>
+              </span>
+            ) : (
+              <span>
+                Exibindo métricas consolidadas de{" "}
+                <strong className="text-gray-900">todo o período histórico</strong>
+                <span className="text-gray-400 ml-1.5 hidden sm:inline">
+                  • inclui acessos acumulados anteriores a 13/10/2026
+                </span>
+                .
+              </span>
+            )}
+          </div>
+
+          {dateRange?.from && (
+            <button
+              type="button"
+              onClick={() => handleDateRangeChange(undefined)}
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              Voltar para todo o período
+            </button>
+          )}
+        </div>
+
+        {/* ================= 1. CARDS DE RESUMO GERAL ================= */}
+        <motion.div
+          animate={{ opacity: isFiltering ? 0.6 : 1 }}
+          transition={{ duration: 0.15 }}
+          className="space-y-8"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <LightMetricCard
+              title="MEIs Ativos"
+              value={data?.totalMeis}
             icon={Lightbulb}
-            colorBg="#E6F7FF"
-            colorText="#0050B3"
+            iconColor="text-blue-600"
           />
-          <SummaryCard
+          <LightMetricCard
             title="Média Geral"
             value={data?.mediaAvaliacao}
             icon={TrendingUp}
-            colorBg="#FFF7E6"
-            colorText="#D46B08"
+            iconColor="text-orange-500"
             suffix="/ 5.0"
           />
-          <SummaryCard
+          <LightMetricCard
             title="Comentários"
             value={data?.totalAvaliacoes}
             icon={CheckCircle}
-            colorBg="#FFF0F6"
-            colorText="#C41D7F"
+            iconColor="text-pink-600"
           />
         </div>
 
-        {/* 2. CARDS DE TRÁFEGO */}
-        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-8">
-          Tráfego e Engajamento
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <SummaryCard
-            title="Usuários"
-            value={data?.totalUsuarios || 0}
-            icon={Users}
-            colorBg="#F6FFED"
-            colorText="#389E0D"
-          />
-          <SummaryCard
-            title="Espaço MEI"
-            value={data?.pageViews?.espacoMei || 0}
-            icon={Globe}
-            colorBg="#F0F5FF"
-            colorText="#2F54EB"
-          />
-          <SummaryCard
-            title="Categ. Visitadas"
-            value={data?.pageViews?.categoriasTotal || 0}
-            icon={MousePointerClick}
-            colorBg="#FFF2E8"
-            colorText="#D4380D"
-          />
+        {/* ================= 2. CARDS DE TRÁFEGO ================= */}
+        <div className="space-y-4">
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest print-break-inside-avoid">
+            Tráfego e Engajamento
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <LightMetricCard
+              title="Usuários"
+              value={data?.totalUsuarios || 0}
+              icon={Users}
+              iconColor="text-emerald-600"
+            />
+            <LightMetricCard
+              title="Espaço MEI"
+              value={data?.pageViews?.espacoMei || 0}
+              icon={Globe}
+              iconColor="text-indigo-600"
+            />
+            <LightMetricCard
+              title="Categorias Visitadas"
+              value={data?.pageViews?.categoriasTotal || 0}
+              icon={MousePointerClick}
+              iconColor="text-red-500"
+            />
+          </div>
         </div>
 
-        {/* 2.5 CARDS ANZOL */}
-        <h2 className="text-xs font-bold text-slate-800 uppercase tracking-widest mt-8">
-          Métricas de Campanha (ANZOL)
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          <SummaryCard
-            title="Acesso Home (GERAL)"
-            value={data?.pageViews?.home || 0}
-            icon={Home}
-            colorBg="#0f172a"
-            colorText="#ffffff"
-          />
-          <SummaryCard
-            title="Home (Orgânico)"
-            value={Math.max(0, (data?.pageViews?.home || 0) - ((data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)))}
-            icon={Home}
-            colorBg="#1e293b"
-            colorText="#bfdbfe"
-          />
-          <SummaryCard
-            title="ANZOL (Geral)"
-            value={(data?.pageViews?.redirecionamentoMei || 0) + (data?.pageViews?.redirecionamentoUsuario || 0)}
-            icon={ExternalLink}
-            colorBg="#0ea5e9"
-            colorText="#ffffff"
-          />
-          <SummaryCard
-            title="ANZOL (MEI)"
-            value={data?.pageViews?.redirecionamentoMei || 0}
-            icon={ExternalLink}
-            colorBg="#1e293b"
-            colorText="#38bdf8"
-          />
-          <SummaryCard
-            title="ANZOL (Usuário)"
-            value={data?.pageViews?.redirecionamentoUsuario || 0}
-            icon={ExternalLink}
-            colorBg="#1e293b"
-            colorText="#38bdf8"
-          />
+        {/* ================= 2.5 CARDS ANZOL ================= */}
+        <div className="space-y-4 mb-8">
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest print-break-inside-avoid">
+            Métricas de Campanha (Anzol)
+          </h2>
+          
+          <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden print-break-inside-avoid">
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+              <InteractiveAnzolCard
+                title="Home (Geral)"
+                value={data?.pageViews?.home || 0}
+                icon={Home}
+              />
+              <InteractiveAnzolCard
+                title="Orgânico"
+                value={Math.max(
+                  0,
+                  (data?.pageViews?.home || 0) -
+                    ((data?.pageViews?.redirecionamentoMei || 0) +
+                      (data?.pageViews?.redirecionamentoUsuario || 0))
+                )}
+                icon={Home}
+              />
+              <InteractiveAnzolCard
+                title="Anzol (Geral)"
+                value={
+                  (data?.pageViews?.redirecionamentoMei || 0) +
+                  (data?.pageViews?.redirecionamentoUsuario || 0)
+                }
+                icon={ExternalLink}
+              />
+              <InteractiveAnzolCard
+                title="Anzol (MEI)"
+                value={data?.pageViews?.redirecionamentoMei || 0}
+                icon={ExternalLink}
+              />
+              <InteractiveAnzolCard
+                title="Anzol (Usuário)"
+                value={data?.pageViews?.redirecionamentoUsuario || 0}
+                icon={ExternalLink}
+              />
+            </div>
+          </div>
         </div>
+
+        {/* ==================================================================================== */}
+        {/* ======================= DAQUI PARA BAIXO FOI MANTIDO INTACTO ======================= */}
+        {/* ==================================================================================== */}
 
         {/* --- 3. NOVOS CARDS: INTERAÇÕES E COMPARTILHAMENTO --- */}
         <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-8 print-break-inside-avoid">
@@ -752,50 +879,98 @@ export default function AdminIndicadoresPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <GraduationCap className="text-amber-600 h-5 w-5" />
-                Interesse em Cursos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-5">
-                {data?.chartCursos?.map((item: any, index: number) => {
-                  const maxVal =
-                    Math.max(...data.chartCursos.map((i: any) => i.qtd)) || 1;
-                  const percent = (item.qtd / maxVal) * 100;
-                  return (
-                    <div key={index} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span
-                          className="font-medium text-gray-700 truncate pr-4"
-                          title={item.curso}
+          {(() => {
+            const CURSOS_PER_PAGE = 6;
+            const listaCursos = data?.chartCursos || [];
+            const totalCursosPages = Math.ceil(listaCursos.length / CURSOS_PER_PAGE);
+            const displayedCursos = listaCursos.slice(
+              cursosPage * CURSOS_PER_PAGE,
+              (cursosPage + 1) * CURSOS_PER_PAGE
+            );
+            const maxValCursos =
+              listaCursos.length > 0
+                ? Math.max(...listaCursos.map((i: any) => i.qtd)) || 1
+                : 1;
+
+            return (
+              <Card className="border border-gray-100 shadow-md bg-white rounded-xl h-full flex flex-col">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <GraduationCap className="text-amber-600 h-5 w-5" />
+                    Interesse em Cursos
+                  </CardTitle>
+                  {totalCursosPages > 1 && (
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                      <span>
+                        {cursosPage + 1} de {totalCursosPages}
+                      </span>
+                      <div className="flex items-center gap-0.5 ml-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-gray-500 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:pointer-events-none"
+                          onClick={() => setCursosPage((prev) => Math.max(0, prev - 1))}
+                          disabled={cursosPage === 0}
+                          title="Página anterior"
                         >
-                          {item.curso}
-                        </span>
-                        <span className="font-bold text-gray-900">
-                          {item.qtd}
-                        </span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-amber-500 rounded-full"
-                          style={{ width: `${percent}%` }}
-                        />
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-gray-500 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:pointer-events-none"
+                          onClick={() =>
+                            setCursosPage((prev) => Math.min(totalCursosPages - 1, prev + 1))
+                          }
+                          disabled={cursosPage >= totalCursosPages - 1}
+                          title="Próxima página"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                  );
-                })}
-                {(!data?.chartCursos || data.chartCursos.length === 0) && (
-                  <p className="text-sm text-gray-500 text-center py-4">
-                    Nenhum dado registrado ainda.
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  )}
+                </CardHeader>
+                <CardContent className="flex-1">
+                  <div className="space-y-4">
+                    {displayedCursos.map((item: any, index: number) => {
+                      const percent = (item.qtd / maxValCursos) * 100;
+                      return (
+                        <div key={index} className="space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <span
+                              className="font-medium text-gray-700 truncate pr-4"
+                              title={item.curso}
+                            >
+                              {item.curso}
+                            </span>
+                            <span className="font-bold text-gray-900">
+                              {item.qtd}
+                            </span>
+                          </div>
+                          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-amber-500 rounded-full transition-all duration-300"
+                              style={{ width: `${percent}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {listaCursos.length === 0 && (
+                      <p className="text-sm text-gray-500 text-center py-4">
+                        Nenhum dado registrado ainda.
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
+      </motion.div>
       </div>
     </div>
   );

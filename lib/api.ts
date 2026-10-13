@@ -472,8 +472,17 @@ export const adminExportEstabelecimentos = async (token: string) => {
   return response.blob();
 };
 
-export async function getAdminStats(token: string) {
-  const res = await fetch(`${API_URL}/api/admin/dashboard-stats`, {
+export async function getAdminStats(
+  token: string,
+  startDate?: string,
+  endDate?: string
+) {
+  const queryParams = new URLSearchParams();
+  if (startDate) queryParams.append("startDate", startDate);
+  if (endDate) queryParams.append("endDate", endDate);
+  const qs = queryParams.toString() ? `?${queryParams.toString()}` : "";
+
+  const res = await fetch(`${API_URL}/api/admin/dashboard-stats${qs}`, {
     method: "GET",
     credentials: "include",
     headers: {
@@ -487,6 +496,29 @@ export async function getAdminStats(token: string) {
   }
 
   return res.json();
+}
+
+export async function dispararRelatorioCampanha(token: string) {
+  const res = await fetch(
+    `${API_URL}/api/admin/relatorios/campanha-anzol/disparar`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    throw new Error(
+      data?.message || data?.error || "Falha ao disparar relatório de campanha"
+    );
+  }
+
+  return data;
 }
 
 // Adicione também esta função para registrar visualizações (home e categorias)
