@@ -44,6 +44,7 @@ import {
   changeUserPassword,
   deleteUserAccount,
   getMyEstablishments,
+  updateMyEstablishment,
   excluirEstabelecimento,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
