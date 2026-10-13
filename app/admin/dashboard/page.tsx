@@ -48,6 +48,9 @@ import {
 import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
 import FormattedDescription from "@/components/FormattedDescription";
+import DOMPurify from "dompurify";
+import CcmeiViewer from "@/components/admin/CcmeiViewer";
+import { getAdminToken } from "@/lib/session";
 
 const { Text, Title } = Typography;
 const { Column } = Table;
@@ -229,7 +232,7 @@ const AdminDashboard: React.FC = () => {
       return (
         <div
           className="prose prose-sm max-w-none prose-p:my-1"
-          dangerouslySetInnerHTML={{ __html: value }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(String(value)) }}
         />
       );
     }
@@ -250,30 +253,19 @@ const AdminDashboard: React.FC = () => {
       );
     }
 
-    if (
-      (key === "ccmeiUrl" || key === "ccmei") &&
-      typeof value === "string" &&
-      value
-    ) {
-      const fileUrl = getFullImageUrl(value);
-      const isPdf = value.toLowerCase().endsWith(".pdf");
+    if (key === "ccmeiUrl" && typeof value === "string" && value) {
+      return selectedItem ? (
+        <CcmeiViewer estabelecimentoId={selectedItem.estabelecimentoId} />
+      ) : null;
+    }
 
-      if (isPdf) {
-        return (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <FilePdfOutlined style={{ fontSize: "24px", color: "red" }} />
-            <a
-              href={fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-700 font-semibold underline"
-            >
-              Ver Certificado (PDF)
-            </a>
-          </div>
-        );
-      }
-      return <Image src={fileUrl} alt={`CCMEI`} width={150} />;
+    if (key === "ccmei" && typeof value === "string" && value) {
+      return selectedItem ? (
+        <CcmeiViewer
+          estabelecimentoId={selectedItem.estabelecimentoId}
+          pendente
+        />
+      ) : null;
     }
 
     if (
@@ -322,7 +314,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) {
       message.error("Acesso negado.");
       router.push("/admin/login");
@@ -354,7 +346,7 @@ const AdminDashboard: React.FC = () => {
     if (!selectedItem) return;
 
     setIsActionLoading(true);
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
 
     try {
       const fetchOptions: RequestInit = {
@@ -376,7 +368,7 @@ const AdminDashboard: React.FC = () => {
 
       const response = await fetch(
         `${API_URL}/api/admin/${action}/${selectedItem.estabelecimentoId}`,
-        fetchOptions,
+        { ...fetchOptions, credentials: "include" },
       );
 
       if (!response.ok) {
@@ -443,7 +435,7 @@ const AdminDashboard: React.FC = () => {
     if (!selectedItem) return;
 
     setIsActionLoading(true);
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) {
       message.error("Autenticação expirada.");
       setIsActionLoading(false);
@@ -608,7 +600,7 @@ const AdminDashboard: React.FC = () => {
                 renderItem={(item) => (
                   <List.Item
                     actions={[
-                      <Button type="link" onClick={() => showModal(item)}>
+                      <Button key="detalhes" type="link" onClick={() => showModal(item)}>
                         Detalhes
                       </Button>,
                     ]}

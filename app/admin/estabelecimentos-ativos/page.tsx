@@ -37,6 +37,7 @@ import {
 } from "@/lib/api";
 import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
+import { getAdminToken } from "@/lib/session";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -74,7 +75,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) {
       message.error("Acesso negado.");
       router.push("/admin/login");
@@ -107,7 +108,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
   }, [fetchData]);
 
   const handleExport = async () => {
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) {
       message.error("Sessão expirada.");
       return;
@@ -165,7 +166,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
 
   // Nova função para Desativar/Reativar (Soft Delete)
   const handleToggleStatus = async (est: Estabelecimento) => {
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) {
       message.error("Autenticação expirada.");
       return;
@@ -191,7 +192,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
 
   // Exclusão definitiva (Hard Delete do BD)
   const handleDeleteDefinitivo = async (estId: number) => {
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) return;
     setLoading(true);
     try {
@@ -258,6 +259,7 @@ const EstabelecimentosAtivosPage: React.FC = () => {
                 }
                 actions={[
                   <Button
+                    key="editar"
                     type="text"
                     icon={<EditOutlined />}
                     onClick={() => openEditModal(est)}

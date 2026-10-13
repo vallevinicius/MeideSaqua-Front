@@ -43,8 +43,10 @@ import {
   canaisDeVendaOpcoes,
 } from "@/constants/mei-options";
 import dynamic from "next/dynamic";
+import CcmeiViewer from "@/components/admin/CcmeiViewer";
 import "react-quill/dist/quill.snow.css";
 import "@/app/cadastro-mei/quill-styles.css";
+import { getAdminToken } from "@/lib/session";
 
 const ReactQuill = dynamic(() => import("react-quill"), {
   ssr: false,
@@ -284,7 +286,7 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
       const fallbackOwner = extractOwner(estabelecimento);
       setOwnerInfo(fallbackOwner);
 
-      const token = localStorage.getItem("admin_token");
+      const token = getAdminToken();
       if (!token) {
         setIsOwnerLoading(false);
         return;
@@ -429,7 +431,7 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
     }
 
     try {
-      const token = localStorage.getItem("admin_token");
+      const token = getAdminToken();
       if (!token) {
         message.error("Autenticação expirada.");
         setIsEditLoading(false);
@@ -454,10 +456,6 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
     } finally {
       setIsEditLoading(false);
     }
-  };
-
-  const isPdf = (url: string | null) => {
-    return url?.toLowerCase().endsWith(".pdf");
   };
 
   const ownerUsername = ownerInfo.username;
@@ -793,34 +791,33 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
                       backgroundColor: "#f9f9f9",
                     }}
                   >
-                    {isPdf(currentCcmei) ? (
+                    {currentCcmei.startsWith("blob:") ? (
+                      <AntdImage
+                        src={currentCcmei}
+                        alt="CCMEI"
+                        style={{
+                          width: "100%",
+                          height: "100px",
+                          objectFit: "contain",
+                        }}
+                      />
+                    ) : (
                       <>
                         <FilePdfOutlined
                           style={{ fontSize: "40px", color: "red" }}
                         />
                         <Text style={{ fontSize: "12px", marginTop: "5px" }}>
-                          Documento PDF
+                          CCMEI
                         </Text>
-                        <a
-                          href={getFullImageUrl(currentCcmei)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ fontSize: "12px", marginTop: "5px" }}
-                        >
-                          Visualizar
-                        </a>
-                      </>
-                    ) : (
-                      <>
-                        <AntdImage
-                          src={getFullImageUrl(currentCcmei)}
-                          alt="CCMEI"
-                          style={{
-                            width: "100%",
-                            height: "100px",
-                            objectFit: "contain",
-                          }}
-                        />
+                        {estabelecimento && (
+                          <CcmeiViewer
+                            estabelecimentoId={estabelecimento.estabelecimentoId}
+                            pendente={
+                              currentCcmei ===
+                              estabelecimento.dados_atualizacao?.ccmei
+                            }
+                          />
+                        )}
                       </>
                     )}
 

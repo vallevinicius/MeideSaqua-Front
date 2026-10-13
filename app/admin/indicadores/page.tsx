@@ -47,6 +47,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { getAdminToken } from "@/lib/session";
 
 // --- CONFIGURAÇÕES VISUAIS ---
 const CATEGORY_COLORS: { [key: string]: string } = {
@@ -95,7 +96,7 @@ export default function AdminIndicadoresPage() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const token = localStorage.getItem("admin_token");
+      const token = getAdminToken();
 
       if (!token) {
         router.push("/admin/login");
@@ -115,13 +116,14 @@ export default function AdminIndicadoresPage() {
 
   // --- FUNÇÃO PARA EXPORTAR CSV ---
   const handleExport = async () => {
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) return;
 
     try {
       const response = await fetch(
         `${API_URL}/api/admin/exportar-estabelecimentos`,
         {
+          credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
         },
       );

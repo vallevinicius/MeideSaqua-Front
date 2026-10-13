@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import FormattedDescription from "@/components/FormattedDescription";
 
-import { StarRating } from "@/app/categoria/[slug]/MEI/page";
+import { StarRating } from "@/components/StarRating";
 
 type User = {
   usuarioId: number;

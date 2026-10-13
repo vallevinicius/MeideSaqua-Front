@@ -24,6 +24,7 @@ import {
   adminGetReviewsByEstablishment,
 } from "@/lib/api";
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
+import { getAdminToken } from "@/lib/session";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -56,7 +57,7 @@ const AdminGerenciarComentariosPage: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) {
       message.error("Acesso negado.");
       router.push("/admin/login");

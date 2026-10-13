@@ -25,6 +25,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 // 1. API REFETORADA
 import { adminGetReviewsByEstablishment, adminDeleteReview } from "@/lib/api";
+import { getAdminToken } from "@/lib/session";
 
 const { Title, Text, Paragraph } = Typography;
 const { confirm } = Modal;
@@ -196,7 +197,7 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
     // 3.2 Variável refatorada
     if (!estabelecimentoId) return;
     setLoading(true);
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) {
       message.error("Acesso negado. Faça login novamente.");
       router.push("/admin/login");
@@ -232,7 +233,7 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
       cancelText: "Cancelar",
       onOk: async () => {
         setIsActionLoading(true);
-        const token = localStorage.getItem("admin_token");
+        const token = getAdminToken();
         if (!token) {
           message.error("Sessão expirada.");
           setIsActionLoading(false);

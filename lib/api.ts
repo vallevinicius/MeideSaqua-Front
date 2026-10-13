@@ -1,3 +1,5 @@
+import { encerrarSessaoAdmin } from "@/lib/session";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 function buildApiUrl(path: string) {
@@ -11,6 +13,32 @@ function buildApiUrl(path: string) {
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   return `${cleanBase}${cleanPath}`;
 }
+
+let renovacaoEmAndamento: Promise<boolean> | null = null;
+
+// Várias chamadas que expiram juntas compartilham uma única renovação.
+function renovarSessao(): Promise<boolean> {
+  if (!renovacaoEmAndamento) {
+    renovacaoEmAndamento = fetch(buildApiUrl("/api/auth/refresh"), {
+      method: "POST",
+      credentials: "include",
+    })
+      .then((r) => r.ok)
+      .catch(() => false)
+      .finally(() => {
+        renovacaoEmAndamento = null;
+      });
+  }
+  return renovacaoEmAndamento;
+}
+
+export const logoutUser = async () => {
+  try {
+    await fetch(buildApiUrl("/api/auth/logout"), { method: "POST", credentials: "include" });
+  } catch {
+    /* sem rede: os cookies expiram sozinhos */
+  }
+};
 
 /**
  * Função principal para chamadas de API.
@@ -41,13 +69,24 @@ async function fetchApi(path: string, options: RequestInit = {}) {
     ];
   }
 
-  console.log("\n[FRONTEND DEBUG] Chamando API:", path);
-  console.log("[FRONTEND DEBUG] Headers que estão sendo enviados:", headers);
 
-  const response = await fetch(buildApiUrl(path), {
-    ...options,
-    headers,
-  });
+  const enviar = () =>
+    fetch(buildApiUrl(path), {
+      ...options,
+      headers,
+      credentials: "include",
+    });
+
+  let response = await enviar();
+
+  // Token de acesso curto (15 min): ao expirar, renova pelo cookie e repete a chamada.
+  const ehRotaDeSessao = path === "/api/auth/login" || path === "/api/auth/refresh";
+  const ehAdmin = path.startsWith("/api/admin");
+  if (response.status === 401 && !ehRotaDeSessao && !ehAdmin) {
+    if (await renovarSessao()) {
+      response = await enviar();
+    }
+  }
 
   const text = await response.text();
   let data: any;
@@ -59,12 +98,15 @@ async function fetchApi(path: string, options: RequestInit = {}) {
   }
 
   if (!response.ok) {
-    if (response.status === 401) {
-      if (path !== "/api/auth/login") {
+    if (response.status === 401 && path !== "/api/auth/login") {
+      if (ehAdmin) {
+        await encerrarSessaoAdmin();
+        window.location.href = "/admin/login";
+      } else {
         localStorage.removeItem("user");
         window.location.href = "/login";
-        throw new Error("Sessão expirada. Redirecionando para login...");
       }
+      throw new Error("Sessão expirada. Redirecionando para login...");
     }
 
     const errorMessage =
@@ -414,6 +456,7 @@ export const adminExportEstabelecimentos = async (token: string) => {
     `${API_URL}/api/admin/exportar-estabelecimentos`,
     {
       method: "GET",
+      credentials: "include",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -432,6 +475,7 @@ export const adminExportEstabelecimentos = async (token: string) => {
 export async function getAdminStats(token: string) {
   const res = await fetch(`${API_URL}/api/admin/dashboard-stats`, {
     method: "GET",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -452,6 +496,7 @@ export async function registrarVisualizacao(identificador: string) {
       `${API_URL}/api/estabelecimentos/visualizacao/${identificador}`,
       {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -519,6 +564,7 @@ export const adminGetUserInteractions = async (
     `${API_URL}/api/admin/users/${userId}/interacoes`,
     {
       method: "GET",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -560,12 +606,14 @@ export const deleteCurso = (id: number, token: string) =>
     headers: { Authorization: `Bearer ${token}` },
   });
 
-export const uploadImage = async (file: File) => {
+export const uploadImage = async (file: File, token?: string) => {
   const formData = new FormData();
   formData.append("file", file);
 
   const response = await fetch(buildApiUrl("/api/files/upload"), {
     method: "POST",
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     body: formData,
   });
 

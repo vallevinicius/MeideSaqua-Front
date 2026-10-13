@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Alert } from "antd";
 import { useRouter, usePathname } from "next/navigation";
+import { encerrarSessaoAdmin } from "@/lib/session";
 
 export default function AdminTokenTimer() {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -21,9 +22,7 @@ export default function AdminTokenTimer() {
       const diff = Math.floor((expiry - now) / 1000);
 
       if (diff <= 0) {
-        localStorage.removeItem("admin_token");
-        localStorage.removeItem("admin_token_expiry");
-        document.cookie = "admin_token=; path=/; max-age=0;";
+        void encerrarSessaoAdmin();
         router.push("/admin/login");
       } else {
         setTimeLeft(diff);

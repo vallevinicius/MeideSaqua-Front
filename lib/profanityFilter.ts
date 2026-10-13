@@ -24,19 +24,41 @@ const PALAVRAS_PROIBIDAS = [
     "put0", "merd4", "cuz4o", "b0sta", "vag4bundo", "vag4bunda"
 ];
 
-const normalizarTexto = (input: string | undefined): string => {
-    if (!input) return "";
-    let texto = input.toLowerCase();
-    texto = texto.replace(/[^a-zA-Z0-9]/g, "");
-    return texto;
+// Texto em minúsculas, sem acentos, dividido em palavras inteiras.
+// "computador" não contém a palavra "puta": só se compara palavra com palavra.
+const palavrasDoTexto = (input: string | undefined): string[] => {
+    if (!input) return [];
+    return input
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .split(/[^a-z0-9]+/)
+        .filter(Boolean);
 };
+
+const PROIBIDAS = new Set(
+    PALAVRAS_PROIBIDAS.map((p) => p.trim()).filter(Boolean),
+);
 
 export const contemPalavrao = (texto: string | undefined): boolean => {
     if (!texto || texto.trim().length === 0) {
         return false;
     }
 
-    const textoNormalizado = normalizarTexto(texto);
+    const palavras = palavrasDoTexto(texto);
+    if (palavras.some((palavra) => PROIBIDAS.has(palavra))) return true;
 
-    return PALAVRAS_PROIBIDAS.some(palavra => textoNormalizado.includes(palavra));
+    // Palavrão escrito com letras separadas ("m e r d a", "m.e.r.d.a"): junta as
+    // sequências de letras isoladas e confere de novo.
+    const sequencia: string[] = [];
+    const juntas: string[] = [];
+    for (const palavra of [...palavras, ""]) {
+        if (palavra.length === 1) {
+            sequencia.push(palavra);
+        } else {
+            if (sequencia.length >= 3) juntas.push(sequencia.join(""));
+            sequencia.length = 0;
+        }
+    }
+    return juntas.some((palavra) => PROIBIDAS.has(palavra));
 };

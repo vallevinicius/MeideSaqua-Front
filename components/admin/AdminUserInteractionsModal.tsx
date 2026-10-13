@@ -18,6 +18,7 @@ import {
   RightOutlined,
 } from "@ant-design/icons";
 import { adminGetUserInteractions } from "@/lib/api";
+import { getAdminToken } from "@/lib/session";
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -49,7 +50,7 @@ export const AdminUserInteractionsModal: React.FC<
 
   const fetchInteractions = async () => {
     setLoading(true);
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) return;
 
     try {

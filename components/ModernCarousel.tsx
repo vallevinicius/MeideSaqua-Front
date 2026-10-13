@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { categories } from "@/app/page"; 
+import { categories } from "@/constants/categories"; 
 
 // A interface para os slides agora usa a estrutura das suas categorias
 interface Slide {
