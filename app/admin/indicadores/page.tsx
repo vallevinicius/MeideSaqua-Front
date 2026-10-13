@@ -314,11 +314,18 @@ export default function AdminIndicadoresPage() {
                 <strong className="text-gray-900">
                   {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
                 </strong>
+                <span className="text-gray-400 ml-1.5 hidden sm:inline">
+                  • rastreamento diário ativo a partir de 13/10/2026
+                </span>
               </span>
             ) : (
               <span>
                 Exibindo métricas consolidadas de{" "}
-                <strong className="text-gray-900">todo o período histórico</strong>.
+                <strong className="text-gray-900">todo o período histórico</strong>
+                <span className="text-gray-400 ml-1.5 hidden sm:inline">
+                  • inclui acessos acumulados anteriores a 13/10/2026
+                </span>
+                .
               </span>
             )}
           </div>

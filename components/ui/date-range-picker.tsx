@@ -3,7 +3,7 @@
 import * as React from "react";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, X } from "lucide-react";
+import { Calendar as CalendarIcon, Info, X } from "lucide-react";
 import { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -14,6 +14,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+// Data oficial de início da coleta diária por data
+export const MIN_TRACKING_DATE = new Date(2026, 9, 13, 0, 0, 0, 0); // 13 de Outubro de 2026
 
 export interface DateRangePickerProps {
   className?: string;
@@ -29,6 +32,10 @@ export function DateRangePicker({
   disabled = false,
 }: DateRangePickerProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+
+  const clampToMinDate = (date: Date): Date => {
+    return date < MIN_TRACKING_DATE ? MIN_TRACKING_DATE : date;
+  };
 
   const presets = [
     {
@@ -46,21 +53,21 @@ export function DateRangePicker({
       label: "Últimos 7 dias",
       getValue: () => {
         const today = new Date();
-        return { from: subDays(today, 6), to: today };
+        return { from: clampToMinDate(subDays(today, 6)), to: today };
       },
     },
     {
       label: "Últimos 30 dias",
       getValue: () => {
         const today = new Date();
-        return { from: subDays(today, 29), to: today };
+        return { from: clampToMinDate(subDays(today, 29)), to: today };
       },
     },
     {
       label: "Este mês",
       getValue: () => {
         const today = new Date();
-        return { from: startOfMonth(today), to: endOfMonth(today) };
+        return { from: clampToMinDate(startOfMonth(today)), to: endOfMonth(today) };
       },
     },
   ];
@@ -100,14 +107,14 @@ export function DateRangePicker({
           >
             <CalendarIcon className="mr-2 h-4 w-4 text-blue-600" />
             {value?.from ? (
-              value.to ? (
+              value.to && value.to.getTime() !== value.from.getTime() ? (
                 <span>
                   {format(value.from, "dd 'de' MMM, yyyy", { locale: ptBR })} -{" "}
                   {format(value.to, "dd 'de' MMM, yyyy", { locale: ptBR })}
                 </span>
               ) : (
                 <span>
-                  A partir de {format(value.from, "dd 'de' MMM, yyyy", { locale: ptBR })}
+                  {format(value.from, "dd 'de' MMM, yyyy", { locale: ptBR })}
                 </span>
               )
             ) : (
@@ -156,12 +163,13 @@ export function DateRangePicker({
             </div>
 
             {/* Calendário Range */}
-            <div className="p-3">
+            <div className="p-3 space-y-2">
               <Calendar
                 initialFocus
                 mode="range"
                 defaultMonth={value?.from || new Date()}
                 selected={value}
+                disabled={{ before: MIN_TRACKING_DATE }}
                 onSelect={(range) => {
                   onChange(range);
                   if (range?.from && range?.to) {
@@ -171,6 +179,14 @@ export function DateRangePicker({
                 numberOfMonths={2}
                 locale={ptBR}
               />
+
+              {/* Nota Informativa sobre Bloqueio Anterior a 13/10 */}
+              <div className="px-2 pt-1 border-t border-gray-100 flex items-center gap-1.5 text-[11px] text-gray-500">
+                <Info className="h-3.5 w-3.5 text-blue-600 flex-shrink-0" />
+                <span>
+                  Coleta por data ativa desde 13/10/2026. Use <strong>Todo o período</strong> para histórico consolidado.
+                </span>
+              </div>
             </div>
           </div>
         </PopoverContent>
