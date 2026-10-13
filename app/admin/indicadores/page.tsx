@@ -32,6 +32,11 @@ import { useRouter } from "next/navigation";
 import { getAdminStats } from "@/lib/api";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { CalendarRange } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -90,28 +95,49 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AdminIndicadoresPage() {
   const [loading, setLoading] = useState(true);
+  const [isFiltering, setIsFiltering] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [data, setData] = useState<any>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      const token = localStorage.getItem("admin_token");
+  const fetchStats = async (range?: DateRange) => {
+    const token = localStorage.getItem("admin_token");
 
-      if (!token) {
-        router.push("/admin/login");
-        return;
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+    try {
+      setIsFiltering(true);
+      let startStr: string | undefined = undefined;
+      let endStr: string | undefined = undefined;
+
+      if (range?.from && range?.to) {
+        startStr = format(range.from, "yyyy-MM-dd");
+        endStr = format(range.to, "yyyy-MM-dd");
       }
-      try {
-        const stats = await getAdminStats(token);
-        setData(stats);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+
+      const stats = await getAdminStats(token, startStr, endStr);
+      setData(stats);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsFiltering(false);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStats();
   }, [router]);
+
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    // Se o usuário selecionou o range completo ou limpou o filtro
+    if (!range || (range.from && range.to)) {
+      fetchStats(range);
+    }
+  };
 
   // --- FUNÇÃO PARA EXPORTAR CSV ---
   const handleExport = async () => {
@@ -226,8 +252,8 @@ export default function AdminIndicadoresPage() {
 
       <div className="max-w-7xl mx-auto space-y-8">
         
-        {/* ================= CABEÇALHO E BOTÕES ================= */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        {/* ================= CABEÇALHO E CONTROLES ================= */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <Link href="/admin/dashboard" className="no-print">
               <Button
@@ -248,8 +274,14 @@ export default function AdminIndicadoresPage() {
             </div>
           </div>
 
-          {/* Botões Redesenhados */}
-          <div className="flex items-center gap-3 no-print">
+          {/* Filtro de Período e Botões de Ação */}
+          <div className="flex flex-wrap items-center gap-3 no-print">
+            <DateRangePicker
+              value={dateRange}
+              onChange={handleDateRangeChange}
+              disabled={isFiltering}
+            />
+
             <Button
               variant="outline"
               onClick={handlePrint}
@@ -268,11 +300,50 @@ export default function AdminIndicadoresPage() {
           </div>
         </div>
 
+        {/* Banner Informativo de Período Ativo */}
+        <div className="flex items-center justify-between flex-wrap gap-2 px-4 py-2.5 rounded-xl border bg-white border-gray-100 shadow-sm no-print">
+          <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
+            <CalendarRange className="h-4 w-4 text-blue-600" />
+            {dateRange?.from && dateRange?.to ? (
+              <span>
+                Filtrando dados de{" "}
+                <strong className="text-gray-900">
+                  {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })}
+                </strong>{" "}
+                até{" "}
+                <strong className="text-gray-900">
+                  {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
+                </strong>
+              </span>
+            ) : (
+              <span>
+                Exibindo métricas consolidadas de{" "}
+                <strong className="text-gray-900">todo o período histórico</strong>.
+              </span>
+            )}
+          </div>
+
+          {dateRange?.from && (
+            <button
+              type="button"
+              onClick={() => handleDateRangeChange(undefined)}
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              Voltar para todo o período
+            </button>
+          )}
+        </div>
+
         {/* ================= 1. CARDS DE RESUMO GERAL ================= */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <LightMetricCard
-            title="MEIs Ativos"
-            value={data?.totalMeis}
+        <motion.div
+          animate={{ opacity: isFiltering ? 0.6 : 1 }}
+          transition={{ duration: 0.15 }}
+          className="space-y-8"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <LightMetricCard
+              title="MEIs Ativos"
+              value={data?.totalMeis}
             icon={Lightbulb}
             iconColor="text-blue-600"
           />
@@ -793,6 +864,7 @@ export default function AdminIndicadoresPage() {
             </CardContent>
           </Card>
         </div>
+      </motion.div>
       </div>
     </div>
   );
