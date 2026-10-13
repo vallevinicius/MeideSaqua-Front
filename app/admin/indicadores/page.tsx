@@ -878,7 +878,7 @@ export default function AdminIndicadoresPage() {
           </Card>
 
           {(() => {
-            const CURSOS_PER_PAGE = 5;
+            const CURSOS_PER_PAGE = 6;
             const listaCursos = data?.chartCursos || [];
             const totalCursosPages = Math.ceil(listaCursos.length / CURSOS_PER_PAGE);
             const displayedCursos = listaCursos.slice(
