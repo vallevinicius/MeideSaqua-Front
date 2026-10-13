@@ -454,6 +454,29 @@ export async function getAdminStats(
   return res.json();
 }
 
+export async function dispararRelatorioCampanha(token: string) {
+  const res = await fetch(
+    `${API_URL}/api/admin/relatorios/campanha-anzol/disparar`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    throw new Error(
+      data?.message || data?.error || "Falha ao disparar relatório de campanha"
+    );
+  }
+
+  return data;
+}
+
 // Adicione também esta função para registrar visualizações (home e categorias)
 export async function registrarVisualizacao(identificador: string) {
   try {

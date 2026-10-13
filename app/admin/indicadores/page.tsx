@@ -27,9 +27,12 @@ import {
   ExternalLink,
   MessageCircle,
   Mail,
+  Loader2,
+  Send,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getAdminStats } from "@/lib/api";
+import { getAdminStats, dispararRelatorioCampanha } from "@/lib/api";
+import { toast } from "sonner";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { DateRange } from "react-day-picker";
@@ -97,6 +100,7 @@ export default function AdminIndicadoresPage() {
   const [loading, setLoading] = useState(true);
   const [isFiltering, setIsFiltering] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [isSendingReport, setIsSendingReport] = useState(false);
   const [data, setData] = useState<any>(null);
   const router = useRouter();
 
@@ -173,6 +177,32 @@ export default function AdminIndicadoresPage() {
   // --- FUNÇÃO PARA IMPRIMIR ---
   const handlePrint = () => {
     window.print();
+  };
+
+  // --- FUNÇÃO PARA DISPARAR RELATÓRIO DE CAMPANHA ANZOL POR E-MAIL ---
+  const handleEnviarRelatorioAnzol = async () => {
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
+      toast.error("Sessão expirada. Faça login novamente.");
+      router.push("/admin/login");
+      return;
+    }
+
+    setIsSendingReport(true);
+    try {
+      const res = await dispararRelatorioCampanha(token);
+      const dests =
+        res.destinatarios && res.destinatarios.length > 0
+          ? res.destinatarios.join(", ")
+          : "os e-mails configurados";
+      toast.success(
+        `Relatório de campanha Anzol enviado com sucesso para: ${dests}`
+      );
+    } catch (error: any) {
+      toast.error(error?.message || "Erro ao disparar relatório por e-mail.");
+    } finally {
+      setIsSendingReport(false);
+    }
   };
 
   if (loading) {
@@ -296,6 +326,22 @@ export default function AdminIndicadoresPage() {
             >
               <Download className="h-4 w-4" />
               <span className="font-medium">Exportar CSV</span>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleEnviarRelatorioAnzol}
+              disabled={isSendingReport}
+              className="h-10 px-4 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 shadow-sm rounded-lg transition-all flex items-center gap-2"
+              title="Disparar relatório consolidado com deltas da campanha Anzol por e-mail"
+            >
+              {isSendingReport ? (
+                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+              ) : (
+                <Mail className="h-4 w-4 text-blue-600" />
+              )}
+              <span className="font-medium">
+                {isSendingReport ? "Enviando..." : "Enviar Relatório Anzol"}
+              </span>
             </Button>
           </div>
         </div>
