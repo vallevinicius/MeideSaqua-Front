@@ -112,15 +112,15 @@ export default function AdminIndicadoresPage() {
       let startStr: string | undefined = undefined;
       let endStr: string | undefined = undefined;
 
-      if (range?.from && range?.to) {
+      if (range?.from) {
         startStr = format(range.from, "yyyy-MM-dd");
-        endStr = format(range.to, "yyyy-MM-dd");
+        endStr = range.to ? format(range.to, "yyyy-MM-dd") : startStr;
       }
 
       const stats = await getAdminStats(token, startStr, endStr);
       setData(stats);
     } catch (error) {
-      console.error(error);
+      console.error("Falha ao buscar estatísticas do painel:", error);
     } finally {
       setIsFiltering(false);
       setLoading(false);

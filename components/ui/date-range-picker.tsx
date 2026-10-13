@@ -77,9 +77,16 @@ export function DateRangePicker({
 
   const hasSelectedRange = Boolean(value?.from);
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open && value?.from && !value?.to) {
+      onChange({ from: value.from, to: value.from });
+    }
+    setIsOpen(open);
+  };
+
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover open={isOpen} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <Button
             id="date-range-picker"
