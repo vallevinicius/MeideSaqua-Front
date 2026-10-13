@@ -47,6 +47,7 @@ import {
   adminResendConfirmation,
 } from "@/lib/api";
 import { AdminUserInteractionsModal } from "@/components/admin/AdminUserInteractionsModal";
+import { getAdminToken } from "@/lib/session";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -86,7 +87,7 @@ const AdminUsuariosPage: React.FC = () => {
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) {
       message.error("Acesso negado.");
       router.push("/admin/login");
@@ -138,7 +139,7 @@ const AdminUsuariosPage: React.FC = () => {
   const handleEditSubmit = async () => {
     try {
       const values = await editForm.validateFields();
-      const token = localStorage.getItem("admin_token");
+      const token = getAdminToken();
       if (!token || !editingUser) return;
 
       setEditLoading(true);
@@ -163,7 +164,7 @@ const AdminUsuariosPage: React.FC = () => {
   const handlePasswordSubmit = async () => {
     try {
       const values = await passwordForm.validateFields();
-      const token = localStorage.getItem("admin_token");
+      const token = getAdminToken();
       if (!token || !passwordUser) return;
 
       setPasswordLoading(true);
@@ -183,7 +184,7 @@ const AdminUsuariosPage: React.FC = () => {
   };
 
   const handleResendEmail = async (user: User) => {
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) return;
     const hide = message.loading("Enviando email...", 0);
     try {
@@ -197,7 +198,7 @@ const AdminUsuariosPage: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) return;
     try {
       await adminDeleteUser(id, token);
@@ -256,7 +257,7 @@ const AdminUsuariosPage: React.FC = () => {
           {currentList.map((user) => (
             <Col xs={24} xl={12} key={user.usuarioId}>
               <Card
-                bordered={false}
+                variant="borderless"
                 className="shadow-sm hover:shadow-md transition-all duration-300 rounded-xl overflow-hidden border border-gray-100"
                 bodyStyle={{ padding: "20px" }}
               >

@@ -15,7 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Image from "next/image";
-import { categories } from "../../page";
+import { categories } from "@/constants/categories";
 import ModernCarousel from "@/components/ModernCarousel";
 import { getAllEstablishments } from "@/lib/api";
 import { Button } from "@/components/ui/button";

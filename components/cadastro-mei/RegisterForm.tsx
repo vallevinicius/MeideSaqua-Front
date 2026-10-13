@@ -424,7 +424,7 @@ export default function RegisterForm({ form, onFinish, loading }: any) {
                 onChange={({ fileList }: any) => setLogoFileList(fileList)}
                 listType="picture"
                 maxCount={1}
-                accept="image/*"
+                accept="image/png,image/jpeg,image/webp"
                 beforeUpload={beforeImageUpload}
               >
                 <Button icon={<UploadOutlined />}>Carregar Logo</Button>
@@ -455,7 +455,7 @@ export default function RegisterForm({ form, onFinish, loading }: any) {
                 listType="picture"
                 multiple
                 maxCount={4}
-                accept="image/*"
+                accept="image/png,image/jpeg,image/webp"
                 beforeUpload={beforeImageUpload}
               >
                 <Button icon={<UploadOutlined />}>Carregar Portfólio</Button>

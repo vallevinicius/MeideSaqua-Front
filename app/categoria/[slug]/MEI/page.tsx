@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import React, { useState, useEffect, useRef, Suspense, useMemo } from "react";
 import { TiltImage } from "@/components/ui/TiltImage";
-import { categories } from "@/app/page";
+import { categories } from "@/constants/categories";
 import {
   getEstablishmentById,
   deleteReview,
@@ -45,65 +45,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { SearchX, CalendarDays } from "lucide-react";
 import DOMPurify from "dompurify";
+import { StarRating } from "@/components/StarRating";
 
-const CustomStarIcon = ({
-  fillPercentage = "100%",
-}: {
-  fillPercentage?: string;
-}) => {
-  const uniqueId = `grad-${Math.random()}`;
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-yellow-400"
-    >
-      <defs>
-        <linearGradient id={uniqueId}>
-          <stop offset="0%" stopColor="currentColor" />
-          <stop offset={fillPercentage} stopColor="currentColor" />
-          <stop
-            offset={fillPercentage}
-            stopColor="transparent"
-            stopOpacity="1"
-          />
-        </linearGradient>
-      </defs>
-      <polygon
-        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-        fill={`url(#${uniqueId})`}
-        stroke="currentColor"
-      />
-    </svg>
-  );
-};
-
-export const StarRating = ({ rating }: { rating: number }) => {
-  const totalStars = 5;
-
-  return (
-    <div className="flex items-center">
-      {[...Array(totalStars)].map((_, index) => {
-        const starValue = index + 1;
-        let fillPercentage = "0%";
-        if (starValue <= rating) {
-          fillPercentage = "100%";
-        } else if (starValue - 1 < rating && starValue > rating) {
-          fillPercentage = `${(rating - index) * 100}%`;
-        }
-
-        return <CustomStarIcon key={index} fillPercentage={fillPercentage} />;
-      })}
-    </div>
-  );
-};
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 
 const normalizeImagePath = (filePath: string) => {
   if (!filePath) return "";
@@ -525,6 +470,7 @@ export default function MeiDetailPage({
                         <span className="text-sm font-medium">Instagram</span>
                       </a>
                     )}
+                    {meiDetails.contatoEstabelecimento && (
                     <a
                       href={`https://wa.me/55${meiDetails.contatoEstabelecimento.replace(
                         /\D/g,
@@ -539,6 +485,7 @@ export default function MeiDetailPage({
                       </div>
                       <span className="text-sm font-medium">WhatsApp</span>
                     </a>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <TagsAnimate tags={tagsList} />
@@ -579,6 +526,7 @@ export default function MeiDetailPage({
                     </div>
                     <span className="text-sm font-medium">Instagram</span>
                   </a>
+                  {meiDetails.contatoEstabelecimento && (
                   <a
                     href={`https://wa.me/${meiDetails.contatoEstabelecimento.replace(
                       /\D/g,
@@ -593,6 +541,7 @@ export default function MeiDetailPage({
                     </div>
                     <span className="text-sm font-medium">WhatsApp</span>
                   </a>
+                  )}
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
                   <TagsAnimate tags={tagsList} />
@@ -636,12 +585,14 @@ export default function MeiDetailPage({
                     </span>
                   </div>
                 )}
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                    <Phone className="w-4 h-4 text-green-600" />
+                {meiDetails.contatoEstabelecimento && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                      <Phone className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span>{meiDetails.contatoEstabelecimento}</span>
                   </div>
-                  <span>{meiDetails.contatoEstabelecimento}</span>
-                </div>
+                )}
 
                 {deliveryOptionsToShow.length > 0 && (
                   <div className="pt-4">

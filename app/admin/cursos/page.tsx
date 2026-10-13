@@ -33,6 +33,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { uploadImage } from "@/lib/api";
+import { encerrarSessaoAdmin, getAdminToken } from "@/lib/session";
 
 const { Title, Text } = Typography;
 
@@ -115,7 +116,7 @@ const AdminCursos = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
 
     if (!token) {
       router.push("/admin/login");
@@ -181,7 +182,7 @@ const AdminCursos = () => {
       return message.warning("O campo nome é obrigatório.");
     }
 
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) {
       message.error("Você precisa estar logado.");
       return;
@@ -196,7 +197,7 @@ const AdminCursos = () => {
 
       const selectedFile = fileList[0]?.originFileObj as File | undefined;
       if (selectedFile) {
-        const uploadResult = await uploadImage(selectedFile);
+        const uploadResult = await uploadImage(selectedFile, token);
         const possibleUrl =
           uploadResult?.imagemUrl ||
           uploadResult?.url ||
@@ -257,6 +258,7 @@ const AdminCursos = () => {
 
       const res = await fetch(url, {
         method: method,
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -265,8 +267,7 @@ const AdminCursos = () => {
       });
 
       if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem("admin_token");
-        document.cookie = "admin_token=; path=/; max-age=0;";
+        void encerrarSessaoAdmin();
         message.error("Sua sessão expirou. Faça login novamente.");
         router.push("/admin/login");
         return;
@@ -291,7 +292,7 @@ const AdminCursos = () => {
 
   // Deletar usando ID
   const handleDelete = async (id: number) => {
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) {
       message.error("Você precisa estar logado.");
       return;
@@ -301,6 +302,7 @@ const AdminCursos = () => {
       const baseUrl = API_URL || "";
       const res = await fetch(`${baseUrl}/api/cursos/${id}`, {
         method: "DELETE",
+        credentials: "include",
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -447,7 +449,7 @@ const AdminCursos = () => {
                     onChange={handleFileChange}
                     beforeUpload={() => false}
                     className="w-full"
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/webp"
                   >
                     <Button icon={<UploadOutlined />} block size="large">
                       Selecionar Arquivo

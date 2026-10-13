@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Form, Input, Button, message, Card, Row, Col } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
+import { iniciarSessaoAdmin } from "@/lib/session";
 
 // URL da sua API backend
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -21,15 +22,15 @@ const AdminLoginPage: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
+        credentials: "include",
       });
 
       const data = await response.json();
 
-      if (response.ok && data.token) {
-        localStorage.setItem("admin_token", data.token);
-        const expiryTime = Date.now() + 28800 * 1000;
-        localStorage.setItem("admin_token_expiry", expiryTime.toString());
-        document.cookie = `admin_token=${data.token}; path=/; max-age=28800;`;
+      if (response.ok && data.success) {
+        // O token fica em cookie httpOnly definido pelo servidor.
+        localStorage.removeItem("admin_token");
+        iniciarSessaoAdmin(data.expiresAt);
         message.success("Login bem-sucedido!");
         router.push("/admin/dashboard");
       } else {
@@ -53,7 +54,7 @@ const AdminLoginPage: React.FC = () => {
                 Painel do Administrador
               </div>
             }
-            bordered={false}
+            variant="borderless"
             className="shadow-2xl rounded-lg"
           >
             <Form

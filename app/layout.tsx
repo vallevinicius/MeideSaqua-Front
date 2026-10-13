@@ -45,11 +45,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <AccessibilityStyles />
       </head>
       <body
+        suppressHydrationWarning
         className={`${poppins.variable} bg-white flex flex-col min-h-screen`}
       >
         <AuthProvider>

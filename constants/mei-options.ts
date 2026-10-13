@@ -1,4 +1,4 @@
-import { categories as categoryObjects } from "@/app/page";
+import { categories as categoryObjects } from "@/constants/categories";
 
 export const areasAtuacao = [
   "Entrega",

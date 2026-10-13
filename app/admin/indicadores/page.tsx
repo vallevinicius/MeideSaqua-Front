@@ -57,6 +57,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { getAdminToken } from "@/lib/session";
 
 // --- CONFIGURAÇÕES VISUAIS ---
 const CATEGORY_COLORS: { [key: string]: string } = {
@@ -108,7 +109,7 @@ export default function AdminIndicadoresPage() {
   const router = useRouter();
 
   const fetchStats = async (range?: DateRange) => {
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
 
     if (!token) {
       router.push("/admin/login");
@@ -149,13 +150,14 @@ export default function AdminIndicadoresPage() {
 
   // --- FUNÇÃO PARA EXPORTAR CSV ---
   const handleExport = async () => {
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) return;
 
     try {
       const response = await fetch(
         `${API_URL}/api/admin/exportar-estabelecimentos`,
         {
+          credentials: "include",
           headers: { Authorization: `Bearer ${token}` },
         },
       );
@@ -185,7 +187,7 @@ export default function AdminIndicadoresPage() {
 
   // --- FUNÇÃO PARA DISPARAR RELATÓRIO DE CAMPANHA ANZOL POR E-MAIL ---
   const handleEnviarRelatorioAnzol = async () => {
-    const token = localStorage.getItem("admin_token");
+    const token = getAdminToken();
     if (!token) {
       toast.error("Sessão expirada. Faça login novamente.");
       router.push("/admin/login");
