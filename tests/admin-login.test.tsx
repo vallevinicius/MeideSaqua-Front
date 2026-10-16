@@ -104,7 +104,7 @@ describe("AdminLoginPage", () => {
       expect(localStorage.getItem("admin_token")).toBeNull();
       expect(localStorage.getItem("admin_token_expiry")).toBe(String(expiresAt));
       expect(sonner.toast.success).toHaveBeenCalledWith(
-        expect.stringContaining("Acesso autorizado")
+        expect.stringContaining("Login realizado com sucesso")
       );
       expect(pushMock).toHaveBeenCalledWith("/admin/dashboard");
     });
