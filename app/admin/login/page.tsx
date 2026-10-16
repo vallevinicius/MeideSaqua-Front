@@ -9,7 +9,6 @@ import * as z from "zod";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
-  ShieldCheck,
   Lock,
   User,
   Eye,
@@ -72,7 +71,7 @@ export default function AdminLoginPage() {
       if (response.ok && data?.success) {
         localStorage.removeItem("admin_token");
         iniciarSessaoAdmin(data.expiresAt);
-        toast.success("Acesso autorizado. Redirecionando para o painel...");
+        toast.success("Login realizado com sucesso! Redirecionando...");
         router.push("/admin/dashboard");
       } else {
         toast.error(
@@ -85,44 +84,32 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-slate-950 text-slate-100 font-sans selection:bg-[#017DB9]/30 selection:text-white">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-slate-50 font-sans selection:bg-[#017DB9]/20 selection:text-[#017DB9]">
       {/* Coluna Esquerda: Hero Visual de Saquarema (Desktop) */}
-      <div className="relative hidden lg:flex lg:w-1/2 xl:w-7/12 flex-col justify-between p-10 xl:p-14 overflow-hidden border-r border-slate-800/80">
+      <div className="relative hidden lg:flex lg:w-1/2 xl:w-7/12 flex-col justify-between p-10 xl:p-14 overflow-hidden border-r border-slate-200">
         <img
           src="/igreja-beach.jpg"
           alt="Paisagem costeira de Saquarema com a tradicional Igreja de Nossa Senhora de Nazareth"
-          className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.78] contrast-[1.08] transform scale-105 transition-transform duration-1000 ease-out"
+          className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.82] contrast-[1.05] transform scale-105 transition-transform duration-1000 ease-out"
         />
 
         {/* Gradientes e camadas de iluminação costeira */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-900/40" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(1,125,185,0.4),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(34,195,98,0.25),transparent_60%)]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/65 to-slate-900/40" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(1,125,185,0.35),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(34,195,98,0.2),transparent_60%)]" />
 
-        {/* Cabeçalho do Hero */}
-        <div className="relative z-10 flex items-center justify-between">
+        {/* Topo do Hero: Logo MeideSaqua Maior e Centralizada */}
+        <div className="relative z-10 flex flex-col items-center justify-center pt-2">
           <Link
             href="/"
-            className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#017DB9] rounded-xl p-1"
+            className="inline-block p-4 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 shadow-2xl hover:bg-white/25 transition-all duration-300 group"
           >
-            <div className="p-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg group-hover:bg-white/15 transition-all">
-              <img
-                src="/LogoMeideSaqua.png"
-                alt="Logo Mei de Saquá"
-                className="h-9 w-auto object-contain"
-              />
-            </div>
+            <img
+              src="/LogoMeideSaqua.png"
+              alt="Logo Mei de Saquá"
+              className="h-16 xl:h-20 w-auto object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-300"
+            />
           </Link>
-
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-slate-700/60 shadow-inner">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22c362] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22c362]" />
-            </span>
-            <span className="text-xs font-medium text-slate-300">
-              Governança Ativa
-            </span>
-          </div>
         </div>
 
         {/* Conteúdo Central do Hero */}
@@ -130,54 +117,49 @@ export default function AdminLoginPage() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
-          className="relative z-10 my-auto max-w-xl space-y-6"
+          className="relative z-10 my-auto max-w-xl mx-auto space-y-6 text-center"
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#017DB9]/20 border border-[#017DB9]/40 text-xs font-semibold tracking-wide text-sky-200">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#22c362]" />
-            MÓDULO DE GESTÃO ESTRATÉGICA
-          </div>
-
           <h1 className="text-3xl xl:text-5xl font-black text-white leading-[1.15] tracking-tight font-poppins drop-shadow-md">
-            Painel Central do Empreendedorismo de{" "}
+            Painel de Gestão do Empreendedorismo de{" "}
             <span className="bg-gradient-to-r from-sky-300 via-[#017DB9] to-[#22c362] bg-clip-text text-transparent">
               Saquarema
             </span>
           </h1>
 
-          <p className="text-base xl:text-lg text-slate-200/90 leading-relaxed font-normal">
-            Plataforma institucional para homologação de MEIs, moderação de avaliações,
-            administração de cursos de capacitação e inteligência de dados da economia local.
+          <p className="text-base xl:text-lg text-slate-200 leading-relaxed font-normal">
+            Plataforma municipal para validação de MEIs, moderação de avaliações,
+            organização de cursos e acompanhamento dos negócios locais.
           </p>
 
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/60 backdrop-blur-md border border-slate-800">
+          <div className="grid grid-cols-2 gap-3 pt-2 max-w-md mx-auto text-left">
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/60 backdrop-blur-md border border-white/10">
               <CheckCircle2 className="w-4 h-4 text-[#22c362] shrink-0" />
-              <span className="text-xs text-slate-300 font-medium">Auditoria de Cadastros</span>
+              <span className="text-xs text-slate-200 font-medium">Validação de Negócios</span>
             </div>
-            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/60 backdrop-blur-md border border-slate-800">
-              <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
-              <span className="text-xs text-slate-300 font-medium">Sessão Segura HttpOnly</span>
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/60 backdrop-blur-md border border-white/10">
+              <CheckCircle2 className="w-4 h-4 text-sky-300 shrink-0" />
+              <span className="text-xs text-slate-200 font-medium">Cursos e Capacitações</span>
             </div>
           </div>
         </motion.div>
 
         {/* Rodapé do Hero */}
-        <div className="relative z-10 flex items-center justify-between border-t border-slate-800/80 pt-6 text-xs text-slate-400">
+        <div className="relative z-10 flex items-center justify-between border-t border-white/15 pt-6 text-xs text-slate-300">
           <div className="flex items-center gap-3">
-            <Building2 className="w-4 h-4 text-slate-400" />
+            <Building2 className="w-4 h-4 text-slate-300" />
             <span>Prefeitura Municipal de Saquarema</span>
           </div>
           <span>SMGS &bull; LabISA</span>
         </div>
       </div>
 
-      {/* Coluna Direita: Formulário de Autenticação */}
-      <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-16 relative">
+      {/* Coluna Direita: Formulário de Autenticação (Modo Claro) */}
+      <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-16 relative bg-white text-slate-900">
         {/* Barra Superior com Botão Voltar */}
         <div className="flex items-center justify-between w-full max-w-md mx-auto">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-colors py-1.5 px-3 rounded-lg hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#017DB9]"
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-[#017DB9] transition-colors py-1.5 px-3 rounded-lg hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#017DB9]"
           >
             <ArrowLeft className="w-4 h-4" />
             Voltar ao portal
@@ -187,7 +169,7 @@ export default function AdminLoginPage() {
             <img
               src="/LogoMeideSaqua.png"
               alt="Logo Mei de Saquá"
-              className="h-7 w-auto object-contain"
+              className="h-8 w-auto object-contain"
             />
           </div>
         </div>
@@ -201,14 +183,14 @@ export default function AdminLoginPage() {
         >
           {/* Header do Card */}
           <div className="mb-8 text-center sm:text-left">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-[#017DB9]/30 to-[#22c362]/20 border border-[#017DB9]/40 mb-4 shadow-lg shadow-[#017DB9]/10">
-              <Lock className="w-6 h-6 text-sky-400" />
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 text-[#017DB9] mb-4 shadow-sm">
+              <Lock className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-poppins">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 font-poppins">
               Acesso Administrativo
             </h2>
-            <p className="text-sm text-slate-400 mt-2">
-              Informe suas credenciais autorizadas para gerenciar a plataforma.
+            <p className="text-sm text-slate-500 mt-2">
+              Informe suas credenciais para gerenciar a plataforma.
             </p>
           </div>
 
@@ -218,7 +200,7 @@ export default function AdminLoginPage() {
             <div className="space-y-2">
               <Label
                 htmlFor="username"
-                className="text-xs font-semibold uppercase tracking-wider text-slate-300"
+                className="text-xs font-semibold uppercase tracking-wider text-slate-700"
               >
                 Usuário ou E-mail
               </Label>
@@ -233,15 +215,15 @@ export default function AdminLoginPage() {
                   placeholder="Seu usuário cadastrado"
                   disabled={isSubmitting}
                   {...register("username")}
-                  className={`pl-10 h-11 bg-slate-900/90 border rounded-xl text-sm text-white placeholder:text-slate-500 transition-all focus-visible:ring-2 focus-visible:ring-[#017DB9] focus-visible:border-transparent ${
+                  className={`pl-10 h-11 bg-white border rounded-xl text-sm text-slate-900 placeholder:text-slate-400 transition-all focus-visible:ring-2 focus-visible:ring-[#017DB9] focus-visible:border-transparent ${
                     errors.username
-                      ? "border-red-500/80 focus-visible:ring-red-500"
-                      : "border-slate-800 hover:border-slate-700"
+                      ? "border-red-500 focus-visible:ring-red-500"
+                      : "border-slate-200 hover:border-slate-300"
                   }`}
                 />
               </div>
               {errors.username && (
-                <p className="text-xs text-red-400 mt-1 font-medium">
+                <p className="text-xs text-red-600 mt-1 font-medium">
                   {errors.username.message}
                 </p>
               )}
@@ -252,7 +234,7 @@ export default function AdminLoginPage() {
               <div className="flex items-center justify-between">
                 <Label
                   htmlFor="password"
-                  className="text-xs font-semibold uppercase tracking-wider text-slate-300"
+                  className="text-xs font-semibold uppercase tracking-wider text-slate-700"
                 >
                   Senha
                 </Label>
@@ -268,10 +250,10 @@ export default function AdminLoginPage() {
                   placeholder="Sua senha de acesso"
                   disabled={isSubmitting}
                   {...register("password")}
-                  className={`pl-10 pr-10 h-11 bg-slate-900/90 border rounded-xl text-sm text-white placeholder:text-slate-500 transition-all focus-visible:ring-2 focus-visible:ring-[#017DB9] focus-visible:border-transparent ${
+                  className={`pl-10 pr-10 h-11 bg-white border rounded-xl text-sm text-slate-900 placeholder:text-slate-400 transition-all focus-visible:ring-2 focus-visible:ring-[#017DB9] focus-visible:border-transparent ${
                     errors.password
-                      ? "border-red-500/80 focus-visible:ring-red-500"
-                      : "border-slate-800 hover:border-slate-700"
+                      ? "border-red-500 focus-visible:ring-red-500"
+                      : "border-slate-200 hover:border-slate-300"
                   }`}
                 />
                 <button
@@ -279,7 +261,7 @@ export default function AdminLoginPage() {
                   onClick={() => setShowPassword((prev) => !prev)}
                   tabIndex={-1}
                   aria-label={showPassword ? "Ocultar senha" : "Exibir senha"}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -289,7 +271,7 @@ export default function AdminLoginPage() {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs text-red-400 mt-1 font-medium">
+                <p className="text-xs text-red-600 mt-1 font-medium">
                   {errors.password.message}
                 </p>
               )}
@@ -299,12 +281,12 @@ export default function AdminLoginPage() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full h-11 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#017DB9] to-[#016292] hover:from-[#018ece] hover:to-[#0170a7] shadow-lg shadow-[#017DB9]/25 transition-all duration-200 hover:shadow-[#017DB9]/40 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full h-11 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#017DB9] to-[#006399] hover:from-[#018ece] hover:to-[#0170a7] shadow-md shadow-[#017DB9]/20 transition-all duration-200 hover:shadow-lg hover:shadow-[#017DB9]/30 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Autenticando...
+                  Acessando...
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
@@ -314,19 +296,10 @@ export default function AdminLoginPage() {
               )}
             </Button>
           </form>
-
-          {/* Aviso de Segurança Institucional */}
-          <div className="mt-8 pt-6 border-t border-slate-900/80 flex items-start gap-3 text-xs text-slate-400 bg-slate-900/40 p-3.5 rounded-xl border border-slate-800/60">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-            <p className="leading-relaxed">
-              Área de acesso restrito e auditado. As sessões são assinadas pelo
-              servidor através de cookies com proteção HttpOnly e expiração programada.
-            </p>
-          </div>
         </motion.div>
 
         {/* Rodapé Direita */}
-        <div className="w-full max-w-md mx-auto text-center text-xs text-slate-400">
+        <div className="w-full max-w-md mx-auto text-center text-xs text-slate-500">
           <p>&copy; {new Date().getFullYear()} Mei de Saquá &bull; Prefeitura de Saquarema</p>
         </div>
       </div>
