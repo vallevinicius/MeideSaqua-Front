@@ -1,45 +1,88 @@
-# Mei de Saqua — Front-end
+<div align="center">
 
-Portal de divulgação de MEIs e estabelecimentos de Saquarema. Aplicação Next.js (App Router) que consome a API do back-end do projeto.
+# MEI de Saquá — Web
 
-## Stack
+**Public portal that promotes the micro-entrepreneurs (MEIs) of Saquarema, Brazil.**
 
-- Next.js 14, React 18, TypeScript
-- Tailwind CSS + componentes Radix/shadcn (`components/ui`)
-- Ant Design (formulários e tabelas das áreas de cadastro/admin)
-- Framer Motion (animações), Swiper (carrossel), React Quill (editor de texto)
+🇧🇷 [Leia em português](README.pt-BR.md)
 
-## Requisitos
+![Next.js](https://img.shields.io/badge/Next.js-14-000000?logo=nextdotjs&logoColor=white) ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS--06B6D4?logo=tailwindcss&logoColor=white) ![Vitest](https://img.shields.io/badge/Vitest-tested-6E9F18?logo=vitest&logoColor=white)
 
-- Node.js 18.18+ e npm
+</div>
 
-## Como rodar
+## About
+
+Next.js front-end of the MEI de Saquá portal, built for the City of Saquarema. Residents find local businesses by category; owners register and manage their establishment; the city team moderates content and follows indicators in an admin area.
+
+The API lives in [MeiDeSaqua-Back](https://github.com/vallevinicius/MeiDeSaqua-Back).
+
+## Features
+
+- Category pages and MEI profiles with reviews
+- Account flow: sign-up, e-mail confirmation, login, password reset, e-mail change
+- Establishment registration form ("Espaço MEI") and owner profile
+- Admin area: approvals, active establishments, comments, courses, users and indicators dashboard
+- Dynamic sitemap generated from the API
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router), React 18, TypeScript |
+| UI | Tailwind CSS, shadcn/ui (Radix), Ant Design, Framer Motion, Swiper |
+| Forms | React Hook Form + Zod |
+| Content | React Quill + DOMPurify (sanitized HTML) |
+| Tests | Vitest + Testing Library |
+
+## Architecture
+
+```
+app/          routes (public pages, account flow, admin area)
+components/   page components and ui/ (Radix/shadcn base)
+context/      React contexts (auth)
+lib/          API clients and helpers
+middleware.ts route protection (UX only; the API enforces authorization)
+tests/        Vitest suites
+```
+
+## Security
+
+- User-generated rich text is sanitized with DOMPurify before rendering
+- Security headers including a Content-Security-Policy in `next.config.mjs`
+
+## Getting started
+
+**Prerequisites:** Node.js 18.18+, the API running locally
 
 ```bash
 npm install
-npm run dev      # http://localhost:3300
+# create .env.local with NEXT_PUBLIC_API_URL
+npm run dev        # http://localhost:3300
 ```
+`next.config.mjs` proxies `/uploads/*` to the API, so the back-end must be running.
 
-Outros scripts: `npm run build`, `npm start`, `npm run lint`.
+### Environment variables
 
-## Variáveis de ambiente
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Base URL of the API |
+| `SITEMAP_API_URL` | API URL used when building the sitemap on the server (optional) |
 
-Crie um `.env.local` na raiz (o arquivo é ignorado pelo git). Consulte o código em `lib/` e `constants/` para as variáveis usadas, principalmente a URL da API.
+### Scripts
 
-O `next.config.mjs` faz proxy de `/uploads/*` para o back-end em `http://localhost:3301`, então o back-end precisa estar rodando localmente.
+| Command | Description |
+|---|---|
+| `npm run dev` | Dev server on port 3300 |
+| `npm run build / npm start` | Production build and server |
+| `npm test` | Vitest suite |
+| `npm run lint` | ESLint |
 
-## Estrutura
+## Testing
 
-```
-app/          rotas (App Router)
-components/   componentes de página e `ui/` (base Radix/shadcn)
-context/      contextos React
-hooks/        hooks customizados
-lib/          clientes de API e utilitários
-types/        tipos TypeScript
-public/       assets estáticos
-```
+9 Vitest + Testing Library test files under `tests/`. Run `npm test`.
 
-## Gerenciador de pacotes
+## Team
 
-O projeto usa **npm** (`package-lock.json`). Não adicione outros lockfiles.
+- [Vinícius Diller](https://github.com/viniciusdiller)
+- Micael Robert
+- [Vinicius do Valle](https://github.com/vallevinicius)
