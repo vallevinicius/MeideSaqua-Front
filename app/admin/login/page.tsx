@@ -54,10 +54,11 @@ export default function AdminLoginPage() {
   });
 
   const onSubmit = async (values: LoginFormData) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+    const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+    const cleanBase = rawApiUrl.replace(/\/+$/, "");
 
     try {
-      const response = await fetch(`${apiUrl}/api/admin/login`, {
+      const response = await fetch(`${cleanBase}/api/admin/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
