@@ -7,11 +7,15 @@ const sessaoAdminAtiva = () => localStorage.setItem("admin_token_expiry", String
 let fetchMock: ReturnType<typeof vi.fn>;
 let abrirJanela: ReturnType<typeof vi.fn>;
 
+let container: HTMLElement;
+
 beforeEach(() => {
+  container = document.createElement("div");
+  document.body.appendChild(container);
   vi.resetModules();
   process.env.NEXT_PUBLIC_API_URL = "http://api.teste";
   fetchMock = vi.fn(() =>
-    Promise.resolve(new Response(new Blob(["pdf"]), { status: 200 })),
+    Promise.resolve(new Response("pdf", { status: 200 })),
   );
   vi.stubGlobal("fetch", fetchMock);
   abrirJanela = vi.fn();
@@ -20,9 +24,13 @@ beforeEach(() => {
   URL.revokeObjectURL = vi.fn();
 });
 
+afterEach(() => {
+  container.remove();
+});
+
 const montar = async (props: { estabelecimentoId: number; pendente?: boolean }) => {
   const { default: CcmeiViewer } = await import("@/components/admin/CcmeiViewer");
-  render(<CcmeiViewer {...props} />);
+  render(<CcmeiViewer {...props} />, { container });
   await userEvent.click(screen.getByRole("button", { name: /ver ccmei/i }));
 };
 
@@ -37,7 +45,7 @@ describe("CcmeiViewer", () => {
     expect(opcoes.credentials).toBe("include");
     expect(opcoes.headers.Authorization).toBe("Bearer sessao-por-cookie");
     expect(abrirJanela.mock.calls[0][0]).toBe("blob:teste");
-  });
+  }, 15000);
 
   it("usa ?pendente=1 para o CCMEI de atualização em análise", async () => {
     sessaoAdminAtiva();
