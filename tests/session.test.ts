@@ -58,3 +58,28 @@ describe("sessão do admin (marcador, sem token)", () => {
     expect(getAdminToken()).toBeNull();
   });
 });
+
+import { ApiError } from "@/lib/errors";
+import { tratarSessaoAdminExpirada } from "@/lib/session";
+
+describe("tratarSessaoAdminExpirada", () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_API_URL = "http://api.teste";
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response("{}"))));
+  });
+
+  it("401 limpa a sessão do admin e devolve true", () => {
+    iniciarSessaoAdmin(Date.now() + 60_000);
+    expect(tratarSessaoAdminExpirada(new ApiError("expirou", 401))).toBe(true);
+    expect(localStorage.getItem("admin_token_expiry")).toBeNull();
+  });
+
+  it.each([[new ApiError("proibido", 403)], [new ApiError("servidor", 500)], [new Error("x")], [null]])(
+    "%o não é tratado como sessão expirada",
+    (erro) => {
+      iniciarSessaoAdmin(Date.now() + 60_000);
+      expect(tratarSessaoAdminExpirada(erro)).toBe(false);
+      expect(getAdminToken()).toBe(SESSAO_COOKIE);
+    },
+  );
+});

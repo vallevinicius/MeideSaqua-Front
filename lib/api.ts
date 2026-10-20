@@ -1,4 +1,5 @@
 import { encerrarSessaoAdmin } from "@/lib/session";
+import { ApiError, erroDaResposta, fetchSeguro, mensagemPorStatus } from "@/lib/errors";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -71,7 +72,7 @@ async function fetchApi(path: string, options: RequestInit = {}) {
 
 
   const enviar = () =>
-    fetch(buildApiUrl(path), {
+    fetchSeguro(buildApiUrl(path), {
       ...options,
       headers,
       credentials: "include",
@@ -94,7 +95,8 @@ async function fetchApi(path: string, options: RequestInit = {}) {
   try {
     data = text ? JSON.parse(text) : {};
   } catch (error) {
-    data = { message: text || "Resposta inválida da API" };
+    // Corpo não-JSON em erro (ex.: HTML de proxy) não deve ir para a tela do usuário.
+    data = response.ok ? { message: text || "Resposta inválida da API" } : {};
   }
 
   if (!response.ok) {
@@ -106,14 +108,14 @@ async function fetchApi(path: string, options: RequestInit = {}) {
         localStorage.removeItem("user");
         window.location.href = "/login";
       }
-      throw new Error("Sessão expirada. Redirecionando para login...");
+      throw new ApiError("Sessão expirada. Redirecionando para login...", 401);
     }
 
     const errorMessage =
       typeof data === "object" && data.message
         ? data.message
-        : `API error: ${response.statusText}`;
-    throw new Error(errorMessage);
+        : mensagemPorStatus(response.status);
+    throw new ApiError(errorMessage, response.status);
   }
 
   return data;
@@ -452,7 +454,7 @@ export function formatarDataParaMesAno(dateString: string): string {
 }
 
 export const adminExportEstabelecimentos = async (token: string) => {
-  const response = await fetch(
+  const response = await fetchSeguro(
     `${API_URL}/api/admin/exportar-estabelecimentos`,
     {
       method: "GET",
@@ -464,8 +466,7 @@ export const adminExportEstabelecimentos = async (token: string) => {
   );
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "Falha ao exportar estabelecimentos");
+    throw await erroDaResposta(response, "Falha ao exportar estabelecimentos.");
   }
 
   // Retorna o Blob do arquivo para download
@@ -482,7 +483,7 @@ export async function getAdminStats(
   if (endDate) queryParams.append("endDate", endDate);
   const qs = queryParams.toString() ? `?${queryParams.toString()}` : "";
 
-  const res = await fetch(`${API_URL}/api/admin/dashboard-stats${qs}`, {
+  const res = await fetchSeguro(`${API_URL}/api/admin/dashboard-stats${qs}`, {
     method: "GET",
     credentials: "include",
     headers: {
@@ -492,14 +493,14 @@ export async function getAdminStats(
   });
 
   if (!res.ok) {
-    throw new Error("Falha ao buscar estatísticas");
+    throw await erroDaResposta(res, "Falha ao buscar estatísticas.");
   }
 
   return res.json();
 }
 
 export async function dispararRelatorioCampanha(token: string) {
-  const res = await fetch(
+  const res = await fetchSeguro(
     `${API_URL}/api/admin/relatorios/campanha-anzol/disparar`,
     {
       method: "POST",
@@ -511,15 +512,11 @@ export async function dispararRelatorioCampanha(token: string) {
     }
   );
 
-  const data = await res.json().catch(() => null);
-
   if (!res.ok) {
-    throw new Error(
-      data?.message || data?.error || "Falha ao disparar relatório de campanha"
-    );
+    throw await erroDaResposta(res, "Falha ao disparar relatório de campanha.");
   }
 
-  return data;
+  return res.json().catch(() => null);
 }
 
 // Adicione também esta função para registrar visualizações (home e categorias)
@@ -593,7 +590,7 @@ export const adminGetUserInteractions = async (
 ) => {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const response = await fetch(
+  const response = await fetchSeguro(
     `${API_URL}/api/admin/users/${userId}/interacoes`,
     {
       method: "GET",
@@ -606,10 +603,7 @@ export const adminGetUserInteractions = async (
   );
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(
-      errorData.message || "Erro ao buscar interações do usuário.",
-    );
+    throw await erroDaResposta(response, "Erro ao buscar interações do usuário.");
   }
 
   return response.json();
@@ -643,13 +637,13 @@ export const uploadImage = async (file: File, token?: string) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(buildApiUrl("/api/files/upload"), {
+  const response = await fetchSeguro(buildApiUrl("/api/files/upload"), {
     method: "POST",
     credentials: "include",
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     body: formData,
   });
 
-  if (!response.ok) throw new Error("Erro no upload");
+  if (!response.ok) throw await erroDaResposta(response, "Erro no upload.");
   return response.json();
 };

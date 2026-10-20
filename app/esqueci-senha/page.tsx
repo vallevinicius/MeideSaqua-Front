@@ -1,5 +1,6 @@
 "use client";
 
+import { ehFalhaDeInfraestrutura, mensagemDeErro } from "@/lib/errors";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,11 +56,13 @@ export default function NovaSenha() {
         window.location.href = "/login";
       }, 3000);
     } catch (err) {
+      // Para erro de dados a mensagem continua genérica (não revela se o e-mail existe).
       addNotification(
-        "Erro ao processar o pedido. Verifique os dados e tente novamente.",
+        ehFalhaDeInfraestrutura(err)
+          ? mensagemDeErro(err)
+          : "Erro ao processar o pedido. Verifique os dados e tente novamente.",
         "error"
       );
-      console.error(err);
     } finally {
       setIsLoading(false);
     }

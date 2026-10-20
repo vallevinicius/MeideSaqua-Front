@@ -1,5 +1,6 @@
 "use client";
 
+import { validarArquivo } from "@/lib/arquivos";
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -868,6 +869,11 @@ const AdminEstabelecimentoModal: React.FC<AdminEstabelecimentoModalProps> = ({
 
                 <Upload
                   beforeUpload={(file) => {
+                    const erroArquivo = validarArquivo(file, { permitePdf: true });
+                    if (erroArquivo) {
+                      message.error(erroArquivo);
+                      return Upload.LIST_IGNORE;
+                    }
                     setNewCcmeiFile(file);
                     // Reseta status de exclusão caso usuário faça upload de um novo
                     setCcmeiToDelete(false);

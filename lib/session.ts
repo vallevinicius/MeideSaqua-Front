@@ -1,3 +1,5 @@
+import { ApiError } from "@/lib/errors";
+
 // A sessão fica em cookies httpOnly do servidor: o JavaScript da página nunca vê o token.
 // O front guarda apenas este marcador (e a hora de expiração) para saber que há sessão.
 // O servidor ignora o marcador no cabeçalho Authorization e usa o cookie.
@@ -35,4 +37,13 @@ export const encerrarSessaoAdmin = async () => {
   } catch {
     /* sem rede: o cookie expira sozinho */
   }
+};
+
+// Se o erro é "sessão do admin vencida" (401), limpa a sessão e leva ao login.
+// Retorna true quando tratou, para o chamador não mostrar outra mensagem.
+export const tratarSessaoAdminExpirada = (erro: unknown): boolean => {
+  if (!(erro instanceof ApiError) || erro.status !== 401) return false;
+  void encerrarSessaoAdmin();
+  if (typeof window !== "undefined") window.location.href = "/admin/login";
+  return true;
 };

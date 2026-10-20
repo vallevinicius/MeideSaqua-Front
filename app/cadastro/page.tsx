@@ -1,5 +1,6 @@
 "use client";
 
+import { mensagemDeErro } from "@/lib/errors";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +19,6 @@ import { registerUser } from "@/lib/api";
 import { AnimatePresence } from "framer-motion";
 import { Notification, NotificationType } from "@/components/ui/notification";
 import { ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
-import { AxiosError } from "axios";
 import { contemPalavrao } from "@/lib/profanityFilter";
 import { removeEmojis, isValidEmail } from "@/lib/utils";
 
@@ -98,14 +98,10 @@ export default function Cadastro() {
         window.location.href = "/login";
       }, 4000);
     } catch (err) {
-      let errorMessage = "Erro ao cadastrar. Verifique seus dados.";
-      if (err instanceof AxiosError && err.response) {
-        errorMessage = err.response.data.message || errorMessage;
-      } else if (err instanceof Error) {
-        errorMessage = err.message || errorMessage;
-      }
-      addNotification(errorMessage, "error");
-      console.error(err);
+      addNotification(
+        mensagemDeErro(err, "Erro ao cadastrar. Verifique seus dados."),
+        "error",
+      );
     } finally {
       setIsLoading(false);
     }

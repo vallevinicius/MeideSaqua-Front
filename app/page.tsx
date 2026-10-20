@@ -10,6 +10,8 @@ import FaleConoscoButton from "@/components/FaleConoscoButton";
 import { registrarVisualizacao, getAllEstablishments } from "@/lib/api"; // <-- Importamos getAllEstablishments
 
 import { categories } from "@/constants/categories";
+import { mensagemDeErro } from "@/lib/errors";
+import { toast } from "sonner";
 
 export default function HomePage() {
   const [visibleCards, setVisibleCards] = useState(0);
@@ -29,9 +31,11 @@ export default function HomePage() {
     const fetchMeis = async () => {
       try {
         const data = await getAllEstablishments();
-        setAllMeis(data);
+        setAllMeis(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error("Erro ao carregar MEIs", error);
+        toast.error(
+          mensagemDeErro(error, "Não foi possível carregar a busca por estabelecimentos."),
+        );
       }
     };
     fetchMeis();

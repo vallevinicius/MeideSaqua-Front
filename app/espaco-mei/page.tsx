@@ -1,5 +1,7 @@
 // ESPAÇO MEI
 "use client";
+import { toast } from "sonner";
+import { mensagemDeErro } from "@/lib/errors";
 import Link from "next/link";
 import React from "react";
 import Image from "next/image";
@@ -52,7 +54,7 @@ export default function SobrePage() {
           setCursos(data.filter((curso) => curso.ativo !== false));
         }
       } catch (error) {
-        console.error("Erro ao buscar cursos", error);
+        toast.error(mensagemDeErro(error, "Não foi possível carregar os cursos."));
       }
     };
     loadCursos();

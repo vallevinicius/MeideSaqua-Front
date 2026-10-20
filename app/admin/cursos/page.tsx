@@ -1,5 +1,6 @@
 "use client";
 
+import { validarArquivo } from "@/lib/arquivos";
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -32,6 +33,7 @@ import {
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { erroDaResposta, fetchSeguro, mensagemDeErro } from "@/lib/errors";
 import { uploadImage } from "@/lib/api";
 import { encerrarSessaoAdmin, getAdminToken } from "@/lib/session";
 
@@ -102,14 +104,13 @@ const AdminCursos = () => {
     try {
       // Verifica se API_URL está definida para evitar erro no fetch
       const url = API_URL ? `${API_URL}/api/cursos` : "/api/cursos";
-      const res = await fetch(url);
+      const res = await fetchSeguro(url);
 
-      if (!res.ok) throw new Error("Erro ao buscar dados");
+      if (!res.ok) throw await erroDaResposta(res, "Erro ao buscar dados.");
       const data = await res.json();
       setCards(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error(error);
-      message.error("Erro ao carregar cursos.");
+      message.error(mensagemDeErro(error, "Erro ao carregar cursos."));
     } finally {
       setLoading(false);
     }
@@ -256,7 +257,7 @@ const AdminCursos = () => {
         body = updateBody;
       }
 
-      const res = await fetch(url, {
+      const res = await fetchSeguro(url, {
         method: method,
         credentials: "include",
         headers: {
@@ -273,10 +274,7 @@ const AdminCursos = () => {
         return;
       }
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Erro ao salvar");
-      }
+      if (!res.ok) throw await erroDaResposta(res, "Erro ao salvar.");
 
       message.success(
         editingId ? "Curso atualizado com sucesso!" : "Novo Curso criado!",
@@ -284,7 +282,7 @@ const AdminCursos = () => {
       cancelEdit();
       fetchCards();
     } catch (error: any) {
-      message.error(error.message);
+      message.error(mensagemDeErro(error, "Erro ao salvar."));
     } finally {
       setSubmitting(false);
     }
@@ -300,7 +298,7 @@ const AdminCursos = () => {
 
     try {
       const baseUrl = API_URL || "";
-      const res = await fetch(`${baseUrl}/api/cursos/${id}`, {
+      const res = await fetchSeguro(`${baseUrl}/api/cursos/${id}`, {
         method: "DELETE",
         credentials: "include",
         headers: {
@@ -308,15 +306,12 @@ const AdminCursos = () => {
         },
       });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Erro ao deletar");
-      }
+      if (!res.ok) throw await erroDaResposta(res, "Erro ao deletar.");
 
       message.success("Curso removido.");
       fetchCards();
     } catch (error: any) {
-      message.error(error.message || "Erro ao excluir curso.");
+      message.error(mensagemDeErro(error, "Erro ao excluir curso."));
     }
   };
 
@@ -447,7 +442,14 @@ const AdminCursos = () => {
                     maxCount={1}
                     fileList={fileList}
                     onChange={handleFileChange}
-                    beforeUpload={() => false}
+                    beforeUpload={(file) => {
+                      const erro = validarArquivo(file);
+                      if (erro) {
+                        message.error(erro);
+                        return Upload.LIST_IGNORE;
+                      }
+                      return false;
+                    }}
                     className="w-full"
                     accept="image/png,image/jpeg,image/webp"
                   >

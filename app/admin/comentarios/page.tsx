@@ -24,7 +24,7 @@ import {
   adminGetReviewsByEstablishment,
 } from "@/lib/api";
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
-import { getAdminToken } from "@/lib/session";
+import { getAdminToken, tratarSessaoAdminExpirada } from "@/lib/session";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -67,6 +67,7 @@ const AdminGerenciarComentariosPage: React.FC = () => {
       const allEstabelecimentos = await getAllActiveEstablishments(token);
 
       const estabelecimentosComComentarios: Estabelecimento[] = [];
+      let falhas = 0;
 
       for (const est of allEstabelecimentos) {
         try {
@@ -90,11 +91,15 @@ const AdminGerenciarComentariosPage: React.FC = () => {
             estabelecimentosComComentarios.push(est);
           }
         } catch (error) {
-          console.error(
-            `Erro ao verificar reviews do estabelecimento ${est.estabelecimentoId}:`,
-            error
-          );
+          if (tratarSessaoAdminExpirada(error)) return;
+          falhas += 1;
         }
+      }
+
+      if (falhas > 0) {
+        message.warning(
+          `Não foi possível verificar os comentários de ${falhas} estabelecimento(s). A lista pode estar incompleta.`,
+        );
       }
 
       setEstabelecimentos(estabelecimentosComComentarios);

@@ -11,6 +11,7 @@ import {
   Typography,
   Rate,
   Divider,
+  message,
 } from "antd";
 import {
   ShopOutlined,
@@ -18,6 +19,8 @@ import {
   RightOutlined,
 } from "@ant-design/icons";
 import { adminGetUserInteractions } from "@/lib/api";
+import { mensagemDeErro } from "@/lib/errors";
+import { tratarSessaoAdminExpirada } from "@/lib/session";
 import { getAdminToken } from "@/lib/session";
 
 const { Text, Title, Paragraph } = Typography;
@@ -62,7 +65,8 @@ export const AdminUserInteractionsModal: React.FC<
         avaliacoes: data.avaliacoes || [],
       });
     } catch (error: any) {
-      console.error("Erro ao buscar interações:", error);
+      if (tratarSessaoAdminExpirada(error)) return;
+      message.error(mensagemDeErro(error, "Erro ao buscar interações do usuário."));
     } finally {
       setLoading(false);
     }

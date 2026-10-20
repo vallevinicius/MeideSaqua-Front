@@ -1,5 +1,6 @@
 "use client";
 
+import { mensagemDeErro } from "@/lib/errors";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,7 +70,7 @@ export default function LoginPage() {
         window.location.href = "/";
       }, 2000);
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err.message;
+      const errorMessage = mensagemDeErro(err, "");
 
       if (errorMessage.includes("não foi verificada")) {
         addNotification(errorMessage, "error");
@@ -80,8 +81,6 @@ export default function LoginPage() {
           "error",
         );
       }
-
-      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +105,7 @@ export default function LoginPage() {
         },
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
         addNotification(

@@ -1,6 +1,6 @@
 // app/categoria/[slug]/page.tsx
 "use client";
-import { useState, useEffect, useMemo, useRef } from "react"; // 1. Adicionado useMemo
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -18,6 +18,8 @@ import Image from "next/image";
 import { categories } from "@/constants/categories";
 import ModernCarousel from "@/components/ModernCarousel";
 import { getAllEstablishments } from "@/lib/api";
+import { mensagemDeErro } from "@/lib/errors";
+import ErrorState from "@/components/ErrorState";
 import { Button } from "@/components/ui/button";
 import FormattedDescription from "@/components/FormattedDescription";
 import { registrarVisualizacao } from "@/lib/api";
@@ -46,6 +48,7 @@ export default function CategoryPage({ params }: PageProps) {
   const [locations, setLocations] = useState<any[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -58,9 +61,9 @@ export default function CategoryPage({ params }: PageProps) {
     }
   }, [decodedSlug]);
 
-  useEffect(() => {
-    const fetchLocations = async () => {
+  const fetchLocations = useCallback(async () => {
       setIsLoading(true);
+      setErro(null);
       try {
         const categoryInfo = categories.find((cat) => cat.id === params.slug);
         const categoryTitle = categoryInfo ? categoryInfo.title : "";
@@ -69,19 +72,26 @@ export default function CategoryPage({ params }: PageProps) {
           return;
         }
         const allEstablishments = await getAllEstablishments();
+        if (!Array.isArray(allEstablishments)) {
+          throw new Error("Resposta inesperada do servidor.");
+        }
         const filteredData = allEstablishments.filter(
           (loc: any) => loc.categoria === categoryTitle
         );
         setLocations(filteredData);
       } catch (error) {
-        console.error("Erro ao buscar estabelecimentos da API:", error);
+        setErro(
+          mensagemDeErro(error, "Não foi possível carregar os estabelecimentos."),
+        );
         setLocations([]);
       } finally {
         setIsLoading(false);
       }
-    };
-    fetchLocations();
   }, [params.slug]);
+
+  useEffect(() => {
+    fetchLocations();
+  }, [fetchLocations]);
 
   const category = categories.find((cat) => cat.id === params.slug);
 
@@ -159,6 +169,14 @@ export default function CategoryPage({ params }: PageProps) {
             Estamos a procurar os melhores MEI's para si. Por favor, aguarde.
           </p>
         </div>
+      </div>
+    );
+  }
+
+  if (erro) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <ErrorState mensagem={erro} onRetry={fetchLocations} className="max-w-md w-full bg-white" />
       </div>
     );
   }

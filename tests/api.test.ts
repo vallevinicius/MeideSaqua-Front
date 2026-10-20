@@ -117,10 +117,10 @@ describe("tratamento de resposta", () => {
     }
   });
 
-  it("erro sem mensagem usa o status", async () => {
+  it("erro sem mensagem usa a mensagem padrão do status", async () => {
     const { getCursos } = await api();
     fetchMock.mockImplementationOnce(() => Promise.resolve(new Response("{}", { status: 503, statusText: "Service Unavailable" })));
-    await expect(getCursos()).rejects.toThrow(/API error/);
+    await expect(getCursos()).rejects.toThrow(/servidor encontrou um problema/);
   });
 
   it("401 em rota autenticada: tenta renovar; se a renovação falha, limpa a sessão e vai ao login", async () => {
@@ -243,6 +243,36 @@ describe("funções que usam fetch direto", () => {
     expect(cab(ultima().opcoes).Authorization).toBe("Bearer T");
     fetchMock.mockImplementationOnce(() => resposta({}, 500));
     await expect(getAdminStats("T")).rejects.toThrow("Falha ao buscar estatísticas");
+  });
+
+  it("fetchApi: falha de rede vira mensagem amigável", async () => {
+    const { getCursos } = await api();
+    fetchMock.mockImplementation(() => Promise.reject(new TypeError("Failed to fetch")));
+    await expect(getCursos()).rejects.toThrow(/conectar ao servidor/);
+  });
+
+  it("fetchApi: erro 500 sem corpo JSON usa a mensagem padrão do status", async () => {
+    const { getCursos } = await api();
+    fetchMock.mockImplementation(() => Promise.resolve(new Response("<html>bad gateway</html>", { status: 502 })));
+    await expect(getCursos()).rejects.toThrow(/servidor encontrou um problema/);
+  });
+
+  it("fetchApi: 429 informa excesso de tentativas", async () => {
+    const { getCursos } = await api();
+    fetchMock.mockImplementation(() => resposta({}, 429));
+    await expect(getCursos()).rejects.toThrow(/Muitas tentativas/);
+  });
+
+  it("uploadImage: erro 415 mostra a mensagem do servidor", async () => {
+    const { uploadImage } = await api();
+    fetchMock.mockImplementation(() => resposta({ message: "Tipo não permitido." }, 415));
+    await expect(uploadImage(new File(["x"], "a.png"))).rejects.toThrow("Tipo não permitido.");
+  });
+
+  it("adminGetUserInteractions não quebra com resposta de erro não-JSON", async () => {
+    const { adminGetUserInteractions } = await api();
+    fetchMock.mockImplementation(() => Promise.resolve(new Response("<html>", { status: 500 })));
+    await expect(adminGetUserInteractions(1, "T")).rejects.toThrow("Erro ao buscar interações do usuário.");
   });
 
   it("registrarVisualizacao não lança erro mesmo sem rede", async () => {

@@ -57,7 +57,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { getAdminToken } from "@/lib/session";
+import { getAdminToken, tratarSessaoAdminExpirada } from "@/lib/session";
+import ErrorState from "@/components/ErrorState";
+import { erroDaResposta, fetchSeguro, mensagemDeErro } from "@/lib/errors";
 
 // --- CONFIGURAÇÕES VISUAIS ---
 const CATEGORY_COLORS: { [key: string]: string } = {
@@ -106,6 +108,7 @@ export default function AdminIndicadoresPage() {
   const [isSendingReport, setIsSendingReport] = useState(false);
   const [data, setData] = useState<any>(null);
   const [cursosPage, setCursosPage] = useState(0);
+  const [erroStats, setErroStats] = useState<string | null>(null);
   const router = useRouter();
 
   const fetchStats = async (range?: DateRange) => {
@@ -126,10 +129,15 @@ export default function AdminIndicadoresPage() {
       }
 
       const stats = await getAdminStats(token, startStr, endStr);
+      setErroStats(null);
       setData(stats);
       setCursosPage(0);
     } catch (error) {
-      console.error("Falha ao buscar estatísticas do painel:", error);
+      if (tratarSessaoAdminExpirada(error)) return;
+      const msg = mensagemDeErro(error, "Falha ao buscar estatísticas do painel.");
+      // Com dados já na tela, só avisa; sem dados, mostra o bloco de erro.
+      if (data) toast.error(msg);
+      else setErroStats(msg);
     } finally {
       setIsFiltering(false);
       setLoading(false);
@@ -154,7 +162,7 @@ export default function AdminIndicadoresPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(
+      const response = await fetchSeguro(
         `${API_URL}/api/admin/exportar-estabelecimentos`,
         {
           credentials: "include",
@@ -172,11 +180,11 @@ export default function AdminIndicadoresPage() {
         a.click();
         a.remove();
       } else {
-        alert("Erro ao exportar arquivo.");
+        throw await erroDaResposta(response, "Erro ao exportar arquivo.");
       }
     } catch (e) {
-      console.error(e);
-      alert("Erro de conexão ao exportar.");
+      if (tratarSessaoAdminExpirada(e)) return;
+      toast.error(mensagemDeErro(e, "Erro ao exportar arquivo."));
     }
   };
 
@@ -205,7 +213,8 @@ export default function AdminIndicadoresPage() {
         `Relatório de campanha Anzol enviado com sucesso para: ${dests}`
       );
     } catch (error: any) {
-      toast.error(error?.message || "Erro ao disparar relatório por e-mail.");
+      if (tratarSessaoAdminExpirada(error)) return;
+      toast.error(mensagemDeErro(error, "Erro ao disparar relatório por e-mail."));
     } finally {
       setIsSendingReport(false);
     }
@@ -215,6 +224,21 @@ export default function AdminIndicadoresPage() {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (erroStats && !data) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50 p-4">
+        <ErrorState
+          mensagem={erroStats}
+          onRetry={() => {
+            setLoading(true);
+            fetchStats(dateRange);
+          }}
+          className="w-full max-w-md bg-white"
+        />
       </div>
     );
   }

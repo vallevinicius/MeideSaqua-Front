@@ -1,4 +1,5 @@
 import React from "react";
+import { validarArquivo } from "@/lib/arquivos";
 import { Button, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
@@ -26,9 +27,9 @@ export const ImageUpload = ({
   label,
 }: any) => {
   const beforeUpload = (file: File) => {
-    const isImage = file.type.startsWith("image/");
-    if (!isImage) {
-      message.error(`${file.name} não é uma imagem válida!`);
+    const erro = validarArquivo(file);
+    if (erro) {
+      message.error(erro);
       return Upload.LIST_IGNORE;
     }
     return false;

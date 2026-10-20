@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Form, Input, Button, Row, Col, Checkbox, Upload } from "antd";
+import { Form, Input, Button, Row, Col, Checkbox, Upload, message } from "antd";
+import { validarArquivo } from "@/lib/arquivos";
 import { UploadOutlined } from "@ant-design/icons";
 import { CommonTitle, customUploadAction } from "./SharedUI";
 import {
@@ -145,6 +146,14 @@ export default function DeleteForm({ form, onFinish, loading }: any) {
             >
               <Upload
                 customRequest={customUploadAction}
+                beforeUpload={(file) => {
+                  const erro = validarArquivo(file, { permitePdf: true });
+                  if (erro) {
+                    message.error(erro);
+                    return Upload.LIST_IGNORE;
+                  }
+                  return false;
+                }}
                 fileList={ccmeiFileList}
                 onChange={({ fileList }: any) => setCcmeiFileList(fileList)}
                 listType="text"

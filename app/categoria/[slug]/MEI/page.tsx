@@ -46,6 +46,8 @@ import { Button } from "@/components/ui/button";
 import { SearchX, CalendarDays } from "lucide-react";
 import DOMPurify from "dompurify";
 import { StarRating } from "@/components/StarRating";
+import ErrorState from "@/components/ErrorState";
+import { ApiError, mensagemDeErro } from "@/lib/errors";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -113,6 +115,7 @@ export default function MeiDetailPage({
   params: { slug: string };
 }) {
   const [meiDetails, setMeiDetails] = useState<any>(null);
+  const [erroCarga, setErroCarga] = useState<string | null>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [rating, setRating] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -145,6 +148,7 @@ export default function MeiDetailPage({
     const meiId = params.slug;
 
     if (!meiId) return;
+    setErroCarga(null);
 
     try {
       const detailsData = await getEstablishmentById(meiId);
@@ -173,8 +177,15 @@ export default function MeiDetailPage({
 
       setAnimateReviews(true);
     } catch (error) {
-      console.error("Falha ao buscar dados do MEI:", error);
-      setMeiDetails(null);
+      if (error instanceof ApiError && error.status === 404) {
+        setMeiDetails(null);
+        setErroCarga(null);
+      } else if (meiDetails) {
+        // Atualização depois de uma ação: mantém a página e só avisa.
+        toast.error(mensagemDeErro(error, "Não foi possível atualizar os dados."));
+      } else {
+        setErroCarga(mensagemDeErro(error, "Não foi possível carregar este estabelecimento."));
+      }
     }
   };
 
@@ -222,6 +233,22 @@ export default function MeiDetailPage({
             A preparar os detalhes para si. Por favor, aguarde um momento.
           </p>
         </div>
+      </div>
+    );
+  }
+
+  if (erroCarga && !meiDetails) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center bg-gray-50 p-4">
+        <ErrorState
+          mensagem={erroCarga}
+          onRetry={async () => {
+            setIsLoading(true);
+            await fetchMeiData();
+            setIsLoading(false);
+          }}
+          className="w-full max-w-md bg-white"
+        />
       </div>
     );
   }
@@ -286,8 +313,7 @@ export default function MeiDetailPage({
       toast.success("Comentário excluído com sucesso!");
       fetchMeiData();
     } catch (error: any) {
-      console.error("Erro ao excluir avaliação:", error);
-      toast.error(error.message || "Não foi possível excluir o comentário.");
+      toast.error(mensagemDeErro(error, "Não foi possível excluir o comentário."));
     } finally {
       setIsDeleteDialogOpen(false);
       setReviewToDelete(null);

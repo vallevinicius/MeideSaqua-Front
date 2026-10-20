@@ -1,5 +1,6 @@
 "use client";
 
+import { validarArquivo } from "@/lib/arquivos";
 import React, { useState } from "react";
 import {
   Form,
@@ -57,9 +58,18 @@ export default function RegisterForm({ form, onFinish, loading }: any) {
   };
 
   const beforeImageUpload = (file: any) => {
-    const isImage = file.type.startsWith("image/");
-    if (!isImage) {
-      message.error(`${file.name} não é uma imagem válida!`);
+    const erro = validarArquivo(file);
+    if (erro) {
+      message.error(erro);
+      return Upload.LIST_IGNORE;
+    }
+    return false;
+  };
+
+  const beforeCcmeiUpload = (file: any) => {
+    const erro = validarArquivo(file, { permitePdf: true });
+    if (erro) {
+      message.error(erro);
       return Upload.LIST_IGNORE;
     }
     return false;
@@ -177,6 +187,7 @@ export default function RegisterForm({ form, onFinish, loading }: any) {
         >
           <Upload
             customRequest={customUploadAction}
+            beforeUpload={beforeCcmeiUpload}
             fileList={ccmeiFileList}
             onChange={({ fileList }: any) => setCcmeiFileList(fileList)}
             listType="text"

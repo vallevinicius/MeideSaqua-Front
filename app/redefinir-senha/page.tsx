@@ -1,5 +1,6 @@
 "use client";
 
+import { ehFalhaDeInfraestrutura, mensagemDeErro } from "@/lib/errors";
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -54,9 +55,10 @@ function ResetPasswordFormComponent() {
       }, 2000);
     } catch (err) {
       toast.error(
-        "Erro ao redefinir a senha. O token pode ser inválido ou ter expirado.",
+        ehFalhaDeInfraestrutura(err)
+          ? mensagemDeErro(err)
+          : "Erro ao redefinir a senha. O token pode ser inválido ou ter expirado.",
       );
-      console.error(err);
     } finally {
       setIsLoading(false);
     }

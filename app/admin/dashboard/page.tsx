@@ -49,8 +49,9 @@ import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
 import FormattedDescription from "@/components/FormattedDescription";
 import DOMPurify from "dompurify";
+import { erroDaResposta, fetchSeguro, mensagemDeErro } from "@/lib/errors";
 import CcmeiViewer from "@/components/admin/CcmeiViewer";
-import { getAdminToken } from "@/lib/session";
+import { getAdminToken, tratarSessaoAdminExpirada } from "@/lib/session";
 
 const { Text, Title } = Typography;
 const { Column } = Table;
@@ -329,7 +330,7 @@ const AdminDashboard: React.FC = () => {
         exclusoes: 1,
       });
     } catch (error: any) {
-      message.error(error.message || "Falha ao buscar dados.");
+      message.error(mensagemDeErro(error, "Falha ao buscar dados."));
     } finally {
       setLoading(false);
     }
@@ -366,22 +367,13 @@ const AdminDashboard: React.FC = () => {
         });
       }
 
-      const response = await fetch(
+      const response = await fetchSeguro(
         `${API_URL}/api/admin/${action}/${selectedItem.estabelecimentoId}`,
         { ...fetchOptions, credentials: "include" },
       );
 
       if (!response.ok) {
-        const errorText = await response.text();
-        try {
-          const errorJson = JSON.parse(errorText);
-          throw new Error(errorJson.message || "Erro do servidor");
-        } catch (e) {
-          console.error("Erro não-JSON da API:", errorText);
-          throw new Error(
-            "Falha na comunicação com o servidor. (Recebeu HTML)",
-          );
-        }
+        throw await erroDaResposta(response, "Erro do servidor.");
       }
 
       const result = await response.json();
@@ -414,7 +406,8 @@ const AdminDashboard: React.FC = () => {
       setSelectedItem(null);
       setRejectionReason("");
     } catch (error: any) {
-      message.error(error.message);
+      if (tratarSessaoAdminExpirada(error)) return;
+      message.error(mensagemDeErro(error));
     } finally {
       setIsActionLoading(false);
     }

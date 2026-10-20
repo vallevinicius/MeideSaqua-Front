@@ -67,7 +67,7 @@ export default function AdminLoginPage() {
         credentials: "include",
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (response.ok && data?.success) {
         localStorage.removeItem("admin_token");
