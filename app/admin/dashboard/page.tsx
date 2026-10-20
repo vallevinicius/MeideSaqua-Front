@@ -21,8 +21,6 @@ import {
   Select,
   Pagination,
   Grid,
-  Dropdown,
-  type MenuProps,
 } from "antd";
 import {
   UserAddOutlined,
@@ -30,15 +28,8 @@ import {
   DeleteOutlined,
   CheckOutlined,
   CloseOutlined,
-  DatabaseOutlined,
-  CommentOutlined,
-  HomeOutlined,
-  TeamOutlined,
   FilePdfOutlined,
-  MenuOutlined,
-  ReadOutlined,
 } from "@ant-design/icons";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   getPendingAdminRequests,
@@ -49,6 +40,8 @@ import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
 import FormattedDescription from "@/components/FormattedDescription";
 import DOMPurify from "dompurify";
+import PageHeader from "@/components/admin/PageHeader";
+import StatusDot from "@/components/admin/StatusDot";
 import { erroDaResposta, fetchSeguro, mensagemDeErro } from "@/lib/errors";
 import CcmeiViewer from "@/components/admin/CcmeiViewer";
 import { getAdminToken, tratarSessaoAdminExpirada } from "@/lib/session";
@@ -580,11 +573,19 @@ const AdminDashboard: React.FC = () => {
       <Col xs={24} md={12} lg={8}>
         <Card
           title={
-            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              {listIcons[title]}
-              {title} ({listData.length})
+            <span className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2">
+                <StatusDot
+                  tipo={listData.length > 0 ? "pendente" : "inativo"}
+                  rotulo={title}
+                />
+              </span>
+              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-slate-600">
+                {listData.length}
+              </span>
             </span>
           }
+          className="h-full"
         >
           {listData.length > 0 ? (
             <>
@@ -625,7 +626,7 @@ const AdminDashboard: React.FC = () => {
               )}
             </>
           ) : (
-            <Empty description="Nenhuma solicitação" />
+            <Empty description="Tudo em dia: nenhuma solicitação pendente." />
           )}
         </Card>
       </Col>
@@ -704,107 +705,12 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <Spin spinning={loading}>
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-          <Title
-            level={isMobile ? 3 : 2}
-            className="m-0 md:text-left text-center"
-          >
-            Painel de Administração
-          </Title>
-        </div>
-
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-          <Link href="/" target="_blank" passHref>
-            <Button
-              icon={<HomeOutlined />}
-              size="large"
-              className={isMobile ? "w-full" : ""}
-            >
-              Home
-            </Button>
-          </Link>
-
-          <div className="w-full md:w-auto">
-            <Dropdown
-              menu={{
-                items: [
-                  {
-                    key: "estabelecimentos",
-                    icon: (
-                      <DatabaseOutlined className="text-blue-500 text-2xl" />
-                    ),
-                    label: (
-                      <Link
-                        href="/admin/estabelecimentos-ativos"
-                        className="text-base ml-2"
-                      >
-                        Gerenciar Estabelecimentos
-                      </Link>
-                    ),
-                  },
-                  {
-                    type: "divider",
-                  },
-                  {
-                    key: "comentarios",
-                    icon: (
-                      <CommentOutlined className="text-[#3C6AB2] text-2xl" />
-                    ),
-                    label: (
-                      <Link
-                        href="/admin/comentarios"
-                        className="text-base ml-2"
-                      >
-                        Gerenciar Comentários
-                      </Link>
-                    ),
-                  },
-                  {
-                    type: "divider",
-                  },
-                  {
-                    key: "usuarios",
-                    icon: <TeamOutlined className="text-[#52c41a] text-2xl" />,
-                    label: (
-                      <Link href="/admin/usuarios" className="text-base ml-2">
-                        Gerenciar Usuários
-                      </Link>
-                    ),
-                  },
-                  {
-                    type: "divider",
-                  },
-                  {
-                    key: "cursos",
-                    icon: <ReadOutlined className="text-orange-500 text-2xl" />,
-                    label: (
-                      <Link href="/admin/cursos" className="text-base ml-2">
-                        Gerenciar Cursos & Capacitações
-                      </Link>
-                    ),
-                  },
-                ],
-              }}
-              trigger={["click"]}
-              placement="bottomRight"
-            >
-              <Button
-                type="primary"
-                icon={<MenuOutlined className="text-xl" />}
-                size="large"
-                className={isMobile ? "w-full h-12 text-lg" : "h-10"}
-                style={{
-                  backgroundColor: "#017DB9",
-                  borderColor: "#017DB9",
-                }}
-              >
-                Menu Administrativo
-              </Button>
-            </Dropdown>
-          </div>
-        </div>
+        <PageHeader
+          titulo="Solicitações"
+          descricao="Revise os cadastros, atualizações e pedidos de exclusão enviados pelos MEIs."
+        />
 
         <Row gutter={[16, 16]}>
           {renderList("Novos Cadastros", data.cadastros, "cadastros")}

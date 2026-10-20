@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeader from "@/components/admin/PageHeader";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Spin,
@@ -20,7 +21,6 @@ import {
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeftOutlined,
   EditOutlined,
   DeleteOutlined,
   DownloadOutlined,
@@ -39,7 +39,7 @@ import AdminEstabelecimentoModal from "@/components/AdminEstabelecimentoModal";
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
 import { getAdminToken } from "@/lib/session";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Search } = Input;
 const { TabPane } = Tabs;
 const { useBreakpoint } = Grid;
@@ -387,31 +387,25 @@ const EstabelecimentosAtivosPage: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8">
-      <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
-        <Link href="/admin/dashboard" passHref>
-          <Button icon={<ArrowLeftOutlined />} type="text">
-            Voltar ao Dashboard
-          </Button>
-        </Link>
-        <div className="flex gap-2">
-          <Link href="/admin/indicadores" passHref>
-            <Button icon={<BarChartOutlined />}>Ver Indicadores</Button>
-          </Link>
-          <Button
-            type="primary"
-            icon={<DownloadOutlined />}
-            onClick={handleExport}
-            loading={exporting}
-            className="bg-green-600 hover:!bg-green-700 border-green-600 hover:!border-green-700"
-          >
-            Exportar Planilha (CSV)
-          </Button>
-        </div>
-      </div>
-
-      <Title level={2} className="mb-6">
-        Gerenciar Estabelecimentos ({filteredEstabelecimentos.length})
-      </Title>
+      <PageHeader
+        titulo="Estabelecimentos"
+        descricao={`${filteredEstabelecimentos.length} cadastrados no portal. Edite, desative ou exporte a lista.`}
+        acoes={
+          <>
+            <Link href="/admin/indicadores" passHref>
+              <Button icon={<BarChartOutlined />}>Ver indicadores</Button>
+            </Link>
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={handleExport}
+              loading={exporting}
+            >
+              Exportar planilha (CSV)
+            </Button>
+          </>
+        }
+      />
 
       <Search
         placeholder="Buscar por nome fantasia, CNPJ ou categoria..."
