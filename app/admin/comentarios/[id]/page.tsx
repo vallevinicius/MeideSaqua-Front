@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeader from "@/components/admin/PageHeader";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   List,
@@ -27,7 +28,7 @@ import Link from "next/link";
 import { adminGetReviewsByEstablishment, adminDeleteReview } from "@/lib/api";
 import { getAdminToken } from "@/lib/session";
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 const { confirm } = Modal;
 const { useBreakpoint } = Grid;
 
@@ -270,34 +271,19 @@ const AdminComentariosDoEstabelecimento: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8">
-      {/* Cabeçalho */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
-        <div>
-          <Title level={isMobile ? 3 : 2} className="m-0" ellipsis>
-            {pageTitle}
-          </Title>
-          {/* 3.6 Tag refatorada */}
-          {pageData?.estabelecimento?.categoria && (
-            <Tag
-              color="blue"
-              className="mt-2"
-              style={{ fontSize: "14px", padding: "5px 10px" }}
-            >
-              Categoria: {pageData.estabelecimento.categoria}
-            </Tag>
-          )}
-        </div>
-        <Link href="/admin/comentarios" passHref>
-          <Button
-            icon={<ArrowLeftOutlined />}
-            size={isMobile ? "middle" : "large"}
-            className={isMobile ? "w-full" : ""}
-          >
-            {/* 3.7 Texto do botão refatorado */}
-            Voltar para Estabelecimentos
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        titulo={pageTitle}
+        descricao={
+          pageData?.estabelecimento?.categoria
+            ? `Categoria: ${pageData.estabelecimento.categoria}`
+            : undefined
+        }
+        acoes={
+          <Link href="/admin/comentarios" passHref>
+            <Button icon={<ArrowLeftOutlined />}>Voltar para estabelecimentos</Button>
+          </Link>
+        }
+      />
 
       <Spin spinning={loading}>
         {/* Layout de Grid (lógica idêntica) */}

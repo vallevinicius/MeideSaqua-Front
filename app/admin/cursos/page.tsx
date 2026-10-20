@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeader from "@/components/admin/PageHeader";
 import { validarArquivo } from "@/lib/arquivos";
 import React, { useState, useEffect } from "react";
 import {
@@ -22,7 +23,6 @@ import {
   UploadOutlined,
   DeleteOutlined,
   SaveOutlined,
-  ArrowLeftOutlined,
   EditOutlined,
   CloseOutlined,
   SearchOutlined,
@@ -32,12 +32,11 @@ import {
 } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import { erroDaResposta, fetchSeguro, mensagemDeErro } from "@/lib/errors";
 import { uploadImage } from "@/lib/api";
 import { encerrarSessaoAdmin, getAdminToken } from "@/lib/session";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 // Interface adaptada para Cursos
 interface CursoCard {
@@ -321,32 +320,13 @@ const AdminCursos = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
-      <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              shape="circle"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => router.back()}
-              className="border-none shadow-none hover:bg-gray-100"
-            />
-            <div>
-              <Title level={4} style={{ margin: 0 }} className="text-gray-800">
-                Gerenciar{" "}
-                <span className="bg-gradient-to-r from-[#017DB9] to-[#22c362] bg-clip-text text-transparent font-bold">
-                  Cursos & Capacitações
-                </span>
-              </Title>
-              <Text type="secondary" className="text-xs">
-                Administração do Espaço MEI
-              </Text>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="p-4 md:p-8">
+      <PageHeader
+        titulo="Cursos e capacitações"
+        descricao="Cadastre os cursos do Espaço MEI e acompanhe o interesse de cada um."
+      />
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-4">
             <Card

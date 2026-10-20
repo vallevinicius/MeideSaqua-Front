@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeader from "@/components/admin/PageHeader";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Spin,
@@ -18,7 +19,7 @@ import {
 } from "antd";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeftOutlined, CommentOutlined } from "@ant-design/icons";
+import { CommentOutlined } from "@ant-design/icons";
 import {
   getAllActiveEstablishments,
   adminGetReviewsByEstablishment,
@@ -26,7 +27,7 @@ import {
 import { Estabelecimento } from "@/types/Interface-Estabelecimento";
 import { getAdminToken, tratarSessaoAdminExpirada } from "@/lib/session";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Search } = Input;
 const { TabPane } = Tabs;
 const { useBreakpoint } = Grid;
@@ -152,18 +153,10 @@ const AdminGerenciarComentariosPage: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8">
-      <Link href="/admin/dashboard" passHref>
-        {" "}
-        {/* */}
-        <Button icon={<ArrowLeftOutlined />} type="text" className="mb-4">
-          Voltar ao Dashboard
-        </Button>
-      </Link>
-
-      <Title level={2} className="mb-6">
-        Gerenciar Comentários por Estabelecimento (
-        {filteredEstabelecimentos.length})
-      </Title>
+      <PageHeader
+        titulo="Comentários"
+        descricao={`Escolha um estabelecimento para ver e moderar as avaliações. ${filteredEstabelecimentos.length} com comentários.`}
+      />
 
       <Search
         placeholder="Buscar por nome do MEI ou categoria..."

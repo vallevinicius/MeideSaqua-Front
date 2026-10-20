@@ -1,5 +1,6 @@
 "use client";
 
+import PageHeader from "@/components/admin/PageHeader";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
@@ -24,9 +25,7 @@ import {
   Divider,
 } from "antd";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
-  ArrowLeftOutlined,
   EditOutlined,
   DeleteOutlined,
   UserOutlined,
@@ -49,7 +48,7 @@ import {
 import { AdminUserInteractionsModal } from "@/components/admin/AdminUserInteractionsModal";
 import { getAdminToken } from "@/lib/session";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Search } = Input;
 const PAGE_SIZE = 8;
 
@@ -388,36 +387,13 @@ const AdminUsuariosPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 md:p-10">
+    <div className="p-4 md:p-8">
       {/* Header Section */}
       <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <Link
-              href="/admin/dashboard"
-              className="text-gray-500 hover:text-blue-600 transition-colors flex items-center gap-2 mb-2"
-            >
-              <ArrowLeftOutlined /> <span>Painel de Controle</span>
-            </Link>
-            <Title
-              level={2}
-              style={{ margin: 0 }}
-              className="font-extrabold tracking-tight"
-            >
-              Gestão de Usuários
-            </Title>
-            <Text type="secondary" className="text-base">
-              Gerencie permissões, contas e segurança dos membros da plataforma.
-            </Text>
-          </div>
-
-          <div className="bg-blue-600 p-4 rounded-2xl text-white shadow-lg shadow-blue-200 min-w-[180px]">
-            <div className="text-xs opacity-80 uppercase font-bold tracking-widest">
-              Total de Usuários
-            </div>
-            <div className="text-3xl font-black">{users.length}</div>
-          </div>
-        </div>
+        <PageHeader
+          titulo="Usuários"
+          descricao={`${users.length} contas no portal. Gerencie dados, senhas e acesso de cada pessoa.`}
+        />
 
         {/* Search & Filter Bar */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-8 flex flex-col md:flex-row gap-4 items-center">
@@ -445,7 +421,6 @@ const AdminUsuariosPage: React.FC = () => {
               type="primary"
               icon={<DownloadOutlined />}
               onClick={handleExportCSV}
-              className="bg-green-600 hover:bg-green-700 shadow-none border-none"
             >
               Exportar CSV
             </Button>
