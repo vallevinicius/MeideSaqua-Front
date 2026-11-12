@@ -6,8 +6,7 @@ import { ConditionalNavbar } from "@/components/ConditionalNavbar";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import { ConditionalFooter } from "@/components/ConditionalFooter";
-import { ConditionalAccessibility } from "@/components/ConditionalAccessibility";
-import AccessibilityStyles from "@/components/AccessibilityStyles";
+import AcessibilidadeSaqua from "@/components/AcessibilidadeSaqua";
 import ConditionalFaleConosco from "@/components/ConditionalFaleConosco";
 
 const poppins = Poppins({
@@ -46,9 +45,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <head>
-        <AccessibilityStyles />
-      </head>
       <body
         suppressHydrationWarning
         className={`${poppins.variable} bg-white flex flex-col min-h-screen`}
@@ -58,7 +54,7 @@ export default function RootLayout({
           <main className="flex-grow">{children}</main>
           <ConditionalFooter />
           <Toaster richColors />
-          <ConditionalAccessibility />
+          <AcessibilidadeSaqua />
           <ConditionalFaleConosco />
         </AuthProvider>
       </body>
