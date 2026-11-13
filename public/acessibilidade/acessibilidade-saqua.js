@@ -113,7 +113,7 @@
     '<div class="acesso-painel" id="acesso-painel" role="group" aria-labelledby="acesso-titulo" hidden>' +
     '<p class="acesso-titulo" id="acesso-titulo">Acessibilidade</p>' +
     '<div class="acesso-opcoes">' +
-    '<button type="button" class="acesso-opcao" id="acesso-libras" hidden>' + icone("maos", 40) +
+    '<button type="button" class="acesso-opcao" id="acesso-libras">' + icone("maos", 40) +
     "<span><strong>Libras</strong><small>Tradução da página com o VLibras</small></span></button>" +
     '<button type="button" class="acesso-opcao" id="acesso-ajustes" hidden>' + icone("ajustes", 40) +
     "<span><strong>Ajustes de leitura</strong><small>Tamanho da fonte, contraste, links e animações</small></span></button>" +
@@ -185,7 +185,13 @@
   // window.VLibrasWidget.open() e a funcao do proprio botao do VLibras.
   function abrirLibras() {
     var widget = window.VLibrasWidget;
-    if (widget && widget.open) widget.open();
+    // Script do VLibras bloqueado (ex.: CSP do servidor, rede ou bloqueador) ou
+    // ainda carregando: a opcao fica visivel e explica, em vez de sumir.
+    if (!window.VLibras || !widget || !widget.open) {
+      avisar("Libras indisponível no momento. Recarregue a página ou tente novamente mais tarde.");
+      return;
+    }
+    widget.open();
     avisarQueArrasta();
   }
 
@@ -648,6 +654,8 @@
   // ---------------------------------------------------------------------------
   // Carrega as duas ferramentas externas
   // ---------------------------------------------------------------------------
+  // A opcao de Libras sempre aparece, entao o botao do menu tambem.
+  mostrarBotao();
   carregar(pasta + "sienna-accessibility.umd.js", aguardarSienna, { "data-asw-lang": "pt" });
   carregar("https://vlibras.gov.br/app/vlibras-plugin.js", function () { iniciarLibras(); observarQuandoSurgir(); });
 })();
