@@ -46,9 +46,6 @@
     ".acesso-botao:focus-visible { outline: 3px solid var(--ac-noite); outline-offset: 5px; border-radius: 50%; }",
     ".acesso-botao.ativo { background: var(--ac-destaque); color: var(--ac-noite); box-shadow: 0 0 0 3px var(--ac-noite), 0 6px 18px rgb(20 33 61 / .25); }",
     ".acesso-botao { transition: transform .5s cubic-bezier(.34, 1.56, .64, 1), opacity .3s ease, background-color .15s; }",
-    ".acesso.recolhido .acesso-botao { transform: translateX(calc(100% - 8px)); opacity: .9; transition: transform .7s cubic-bezier(.65, 0, .35, 1), opacity .5s ease, background-color .15s; }",
-    ".acesso.recolhido .acesso-botao:hover, .acesso.recolhido .acesso-botao:focus-visible { transform: none; opacity: 1; transition: transform .5s cubic-bezier(.34, 1.56, .64, 1), opacity .3s ease, background-color .15s; }",
-    "@media (prefers-reduced-motion: reduce) { .acesso-botao, .acesso.recolhido .acesso-botao, .acesso.recolhido .acesso-botao:hover, .acesso.recolhido .acesso-botao:focus-visible { transition-duration: .6s, .4s, .15s !important; transition-timing-function: ease-in-out !important; } }",
     ".acesso-painel { display: grid; gap: 14px; width: min(340px, calc(100vw - 40px)); max-height: calc(100vh - 120px); overflow-y: auto; padding: 16px; border: 1px solid var(--ac-linha); border-radius: 12px; background: #fff; color: var(--ac-tinta); box-shadow: 0 12px 32px rgb(20 33 61 / .18); overscroll-behavior: contain; text-align: left; }",
     ".acesso-titulo { margin: 0; font-weight: 800; font-size: 1.25rem; line-height: 1.2; letter-spacing: -0.01em; color: var(--ac-noite); }",
     ".acesso-opcoes { display: grid; gap: 8px; }",
@@ -436,7 +433,6 @@
   function abrirMenu(abrir) {
     painel.hidden = !abrir;
     botao.setAttribute("aria-expanded", String(abrir));
-    recolherDepois(abrir ? 0 : 3000);
     if (!abrir) return;
     var primeiro = painel.querySelector(".acesso-opcao:not([hidden]), .ouvir button:not(:disabled)");
     if (primeiro) primeiro.focus();
@@ -466,20 +462,6 @@
 
   // O botao so aparece se ao menos uma ferramenta estiver disponivel.
   function mostrarBotao() { caixa.hidden = false; }
-
-  // Botao recolhido: alguns segundos depois de abrir o site (e depois de fechar
-  // o menu), ele desliza para a borda e deixa so uma ponta a mostra. Com o menu
-  // aberto ou com a leitura em voz alta ativa, fica inteiro.
-  var temporizadorRecolher = 0;
-  function recolherDepois(tempo) {
-    clearTimeout(temporizadorRecolher);
-    caixa.classList.remove("recolhido");
-    if (!tempo) return;
-    temporizadorRecolher = setTimeout(function () {
-      if (painel.hidden && !botao.classList.contains("ativo")) caixa.classList.add("recolhido");
-    }, tempo);
-  }
-  recolherDepois(4000);
 
   // ---------------------------------------------------------------------------
   // Ouvir esta pagina: Web Speech API (speechSynthesis), pt-BR, sem dependencias.
