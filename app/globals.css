@@ -45,3 +45,331 @@
 .animate-slide-down {
   animation: slide-down 0.3s ease-out;
 }
+
+/* ---------------------------------------------------------------------------
+   Menu de acessibilidade (components/AcessibilidadeSaqua.tsx)
+   --------------------------------------------------------------------------- */
+:root {
+  --ac-cor: #017db9;
+  --ac-cor-escura: #016494;
+  --ac-suave: #e3f2fa;
+  --ac-destaque: #f6b829;
+  --ac-noite: #14213d;
+  --ac-tinta-2: #3a4763;
+  --ac-linha-forte: #b4c2d6;
+}
+
+.acesso {
+  position: fixed;
+  right: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index: 99990;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  font-family: inherit;
+  line-height: 1.3;
+}
+
+.acesso[hidden],
+.acesso [hidden] {
+  display: none !important;
+}
+
+.acesso-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(1, 125, 185, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgb(20 33 61 / 0.25);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background-color 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.acesso-botao:hover {
+  background: rgba(1, 100, 148, 0.96);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgb(20 33 61 / 0.3);
+}
+
+.acesso-botao:focus-visible {
+  outline: 3px solid var(--ac-noite);
+  outline-offset: 4px;
+  border-radius: 9999px;
+}
+
+.acesso-botao.ativo {
+  background: var(--ac-destaque);
+  color: var(--ac-noite);
+  border-color: rgba(20, 33, 61, 0.35);
+}
+
+.acesso-pilulas {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+@keyframes acesso-pilula-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.acesso-pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 15px 7px 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(1, 125, 185, 0.25);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--ac-noite);
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 8px 22px rgb(20 33 61 / 0.16);
+  cursor: pointer;
+  animation: acesso-pilula-entrar 0.18s ease backwards;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.acesso-pilula:nth-child(2) {
+  animation-delay: 0.04s;
+}
+
+.acesso-pilula:nth-child(3) {
+  animation-delay: 0.08s;
+}
+
+.acesso-pilula:nth-child(4) {
+  animation-delay: 0.12s;
+}
+
+.acesso-pilula:hover {
+  border-color: var(--ac-cor);
+  background: var(--ac-suave);
+  transform: translateX(-3px);
+}
+
+.acesso-pilula-icone {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--ac-suave);
+  color: var(--ac-cor);
+  flex-shrink: 0;
+}
+
+.acesso-pilula:hover .acesso-pilula-icone {
+  background: #ffffff;
+}
+
+.acesso-pilula-badge {
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--ac-destaque);
+  color: var(--ac-noite);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.acesso-pilula-player {
+  display: grid;
+  gap: 8px;
+  width: min(300px, calc(100vw - 24px));
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(1, 125, 185, 0.3);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--ac-noite);
+  box-shadow: 0 10px 26px rgb(20 33 61 / 0.18);
+  animation: acesso-pilula-entrar 0.18s ease backwards;
+}
+
+.acesso-player-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.acesso-player-titulo {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ac-cor);
+}
+
+.acesso-player-fechar {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--ac-suave);
+  color: var(--ac-noite);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.acesso-player-controles {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ouvir-acao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--ac-linha-forte);
+  border-radius: 9999px;
+  background: #ffffff;
+  color: var(--ac-noite);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+
+.ouvir-acao-principal {
+  flex: 1;
+  border-color: var(--ac-cor);
+  background: var(--ac-cor);
+  color: #ffffff;
+}
+
+.ouvir-acao-principal:hover {
+  background: var(--ac-cor-escura);
+}
+
+.ouvir-acao:not(.ouvir-acao-principal):hover {
+  border-color: var(--ac-cor);
+  background: var(--ac-suave);
+}
+
+.ouvir-velocidade-compacta {
+  min-height: 36px;
+  padding: 4px 10px;
+  border: 1px solid var(--ac-linha-forte);
+  border-radius: 9999px;
+  background: #ffffff;
+  color: var(--ac-noite);
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.ouvir-estado {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--ac-tinta-2);
+}
+
+.acesso button:focus-visible,
+.acesso select:focus-visible {
+  outline: 3px solid var(--ac-noite);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acesso-pilula,
+  .acesso-pilula-player {
+    animation: none;
+  }
+}
+
+/* Celular: só o ícone, para não cobrir o conteúdo. */
+@media (max-width: 640px) {
+  .acesso-botao {
+    width: 52px;
+    height: 52px;
+    padding: 0;
+  }
+
+  .acesso-botao-texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* VLibras e Sienna: os botões próprios ficam escondidos; o menu os abre. */
+#vlibras-access-wrapper,
+body .asw-menu-btn {
+  display: none !important;
+}
+
+/* O Sienna e o VLibras leem o alvo do clique: o ícone dentro do botão não deve ser o alvo. */
+button svg,
+a svg,
+[role="button"] svg {
+  pointer-events: none;
+}
+
+/* Sienna: cores do menu trocadas pelas do site. */
+body .asw-menu-header {
+  background: var(--ac-cor) !important;
+}
+body .asw-menu-header svg {
+  fill: var(--ac-cor) !important;
+}
+body .asw-card-title {
+  color: var(--ac-cor) !important;
+}
+body .asw-plus:hover,
+body .asw-minus:hover {
+  border-color: var(--ac-cor) !important;
+}
+body .asw-btn.asw-selected {
+  border-color: var(--ac-cor) !important;
+  background: var(--ac-suave) !important;
+}
+body .asw-btn.asw-selected svg,
+body .asw-btn.asw-selected span {
+  fill: var(--ac-cor) !important;
+  color: var(--ac-cor) !important;
+}
+body .asw-btn.asw-selected::after {
+  background: var(--ac-cor) !important;
+}
+body .asw-menu-reset-footer-btn {
+  background: var(--ac-cor) !important;
+}
