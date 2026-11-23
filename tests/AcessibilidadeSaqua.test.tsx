@@ -173,7 +173,7 @@ describe("AcessibilidadeSaqua: Sienna", () => {
     const usuario = userEvent.setup();
     render(<AcessibilidadeSaqua />);
     await abrirMenu(usuario);
-    expect(screen.queryByRole("button", { name: "Ajustes de leitura" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Menu de acessibilidade" })).toBeNull();
   });
 
   it("quando o Sienna termina de carregar, a opção aparece e abre o menu dele", async () => {
@@ -184,7 +184,7 @@ describe("AcessibilidadeSaqua: Sienna", () => {
     render(<AcessibilidadeSaqua />);
     await abrirMenu(usuario);
 
-    const ajustes = await screen.findByRole("button", { name: "Ajustes de leitura" });
+    const ajustes = await screen.findByRole("button", { name: "Menu de acessibilidade" });
     await usuario.click(ajustes);
     expect(clique).toHaveBeenCalledTimes(1);
   });
@@ -194,7 +194,7 @@ describe("AcessibilidadeSaqua: Sienna", () => {
     const usuario = userEvent.setup();
     const { unmount } = render(<AcessibilidadeSaqua />);
     await abrirMenu(usuario);
-    await screen.findByRole("button", { name: "Ajustes de leitura" });
+    await screen.findByRole("button", { name: "Menu de acessibilidade" });
     expect(screen.queryByRole("button", { name: /Ouvir por parágrafo/ })).toBeNull();
     unmount();
 

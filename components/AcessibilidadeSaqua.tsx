@@ -141,7 +141,7 @@ function MenuAcessibilidade() {
             <span className="acesso-pilula-icone" aria-hidden="true">
               <SlidersHorizontal {...ICONE} />
             </span>
-            <span>Ajustes de leitura</span>
+            <span>Menu de acessibilidade</span>
           </button>
         )}
 
