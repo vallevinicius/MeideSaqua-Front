@@ -289,3 +289,62 @@ describe("AcessibilidadeSaqua: ouvir a página", () => {
     expect(sintese.cancel).toHaveBeenCalled();
   });
 });
+
+describe("AcessibilidadeSaqua: conflito VLibras x Ouvir por parágrafo", () => {
+  it("clicar na janela do VLibras com Ouvir por parágrafo ativo suspende o Sienna naquele clique e o reanexa depois", async () => {
+    render(<AcessibilidadeSaqua />);
+    document.documentElement.classList.add("asw-screen-reader");
+
+    const fnSienna = vi.fn();
+    window.__asw__onClickScreenReader = fnSienna;
+    document.addEventListener("click", fnSienna, true);
+
+    const vlibrasRoot = document.createElement("div");
+    vlibrasRoot.id = "vlibras-app-root";
+    document.body.appendChild(vlibrasRoot);
+
+    try {
+      vlibrasRoot.click();
+      expect(fnSienna).not.toHaveBeenCalled();
+
+      await new Promise((r) => window.setTimeout(r, 10));
+
+      document.querySelector("h1")!.click();
+      expect(fnSienna).toHaveBeenCalledTimes(1);
+    } finally {
+      document.removeEventListener("click", fnSienna, true);
+      window.__asw__onClickScreenReader = undefined;
+    }
+  });
+
+  it("clicar no botão do leitor dentro do menu do Sienna aplica vlibras-links durante o clique e limpa depois", async () => {
+    render(<AcessibilidadeSaqua />);
+
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `<div class="asw-container"><div class="asw-menu"><button class="asw-btn" data-key="screen-reader"><span>Leitor</span></button></div></div>`
+    );
+    const botaoLeitor = document.querySelector<HTMLElement>(".asw-btn[data-key='screen-reader']")!;
+    const spanInterno = botaoLeitor.querySelector("span")!;
+
+    let tinhaClasseNoBotao = false;
+    let tinhaClasseNoSpan = false;
+    const listenerVLibras = () => {
+      tinhaClasseNoBotao = botaoLeitor.classList.contains("vlibras-links");
+      tinhaClasseNoSpan = spanInterno.classList.contains("vlibras-links");
+    };
+    document.body.addEventListener("click", listenerVLibras, true);
+
+    try {
+      spanInterno.click();
+      expect(tinhaClasseNoBotao).toBe(true);
+      expect(tinhaClasseNoSpan).toBe(true);
+
+      await new Promise((r) => window.setTimeout(r, 10));
+      expect(botaoLeitor.classList.contains("vlibras-links")).toBe(false);
+      expect(spanInterno.classList.contains("vlibras-links")).toBe(false);
+    } finally {
+      document.body.removeEventListener("click", listenerVLibras, true);
+    }
+  });
+});

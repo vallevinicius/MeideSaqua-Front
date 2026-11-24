@@ -152,11 +152,31 @@ export function useAcessibilidadeVendors(botaoRetornoRef: React.RefObject<HTMLEl
       window.setTimeout(() => elemento.classList.remove("vlibras-links"), 0);
     };
 
+    // Suspende o leitor de tela do Sienna apenas durante o clique atual e o reanexa em seguida.
+    const ignorarCliqueNoSiennaUmaVez = () => {
+      const funcaoSienna = window.__asw__onClickScreenReader;
+      if (!funcaoSienna) return;
+      document.removeEventListener("click", funcaoSienna, true);
+      window.setTimeout(() => {
+        if (leitorParagrafoLigado() && window.__asw__onClickScreenReader === funcaoSienna) {
+          document.addEventListener("click", funcaoSienna, true);
+        }
+      }, 0);
+    };
+
     const aoCapturarCliqueNaJanela = (evento: MouseEvent) => {
       const alvo = evento.target as HTMLElement | null;
       if (!alvo) return;
 
-      const dentroDoMenuAcessibilidade = !!alvo.closest("#acesso");
+      const dentroDoVLibras = !!alvo.closest("#vlibras-app-root, #vlibras-access-wrapper");
+      const dentroDoMenuAcessibilidade =
+        !!alvo.closest("#acesso") ||
+        !!alvo.closest("[data-acesso-trigger]") ||
+        !!alvo.closest(".asw-container") ||
+        !!alvo.closest(".asw-menu") ||
+        !!alvo.closest(".asw-menu-btn") ||
+        !!alvo.closest(".asw-widget") ||
+        !!alvo.closest(".asw-structure-modal");
       const interativo = alvo.closest<HTMLElement>("a[href], button, [role='button'], input, select, label");
       const textoVisivel = (interativo?.innerText || "").trim();
       const semTextoParaLer = !!interativo && (!textoVisivel || /^[×✕xX+-]$/.test(textoVisivel));
@@ -167,15 +187,11 @@ export function useAcessibilidadeVendors(botaoRetornoRef: React.RefObject<HTMLEl
       }
 
       if (!leitorParagrafoLigado()) return;
-      if (
-        dentroDoMenuAcessibilidade ||
-        alvo.closest(".asw-menu") ||
-        alvo.closest(".asw-menu-btn") ||
-        alvo.closest(".asw-widget") ||
-        alvo.closest(".asw-structure-modal")
-      ) {
+      if (dentroDoVLibras) {
+        ignorarCliqueNoSiennaUmaVez();
         return;
       }
+      if (dentroDoMenuAcessibilidade) return;
 
       if (!interativo) {
         ultimoInterativoRef.current = null;
@@ -188,16 +204,7 @@ export function useAcessibilidadeVendors(botaoRetornoRef: React.RefObject<HTMLEl
         window.clearTimeout(timerInterativoRef.current);
         window.speechSynthesis?.cancel();
         limparDestaquesLeituraSienna();
-
-        const funcaoSienna = window.__asw__onClickScreenReader;
-        if (funcaoSienna) {
-          document.removeEventListener("click", funcaoSienna, true);
-          window.setTimeout(() => {
-            if (leitorParagrafoLigado() && window.__asw__onClickScreenReader === funcaoSienna) {
-              document.addEventListener("click", funcaoSienna, true);
-            }
-          }, 0);
-        }
+        ignorarCliqueNoSiennaUmaVez();
         return;
       }
 
